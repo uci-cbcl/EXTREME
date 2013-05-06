@@ -1,4 +1,4 @@
 OnlineMEME
 ==========
 
-An Online implementation of the MEME algorithm
+Hi, An Online implementation of the MEME algorithm
