@@ -55,11 +55,18 @@ Equation 10 from the Bailey and Elkan paper. The expectation of the Z value for 
 given the motif frequency and the motif and background models. Note that g=2, where group 1
 is the motif, and group 2 is the background.
 
+Input:
+X, a string. The sequence.
+theta_motif, a matrix. The pwm of the motif.
+theta_background, an array. The background model.
+lambda_motif, a double. The fraction of motifs among the sequences.
+
 Notes:
 5/6/13, work on this part
 """
-def Z0(X,theta_motif):
-    return 0
+def Z0(X,theta_motif, theta_background,lambda_motif):
+    return px_motif(X,theta_motif)*lambda_motif/ \
+        (px_motif(X,theta_motif)*lambda_motif + px_background(X,theta_background)*(1-lambda_motif))
 
 def EM():
     #E-step
