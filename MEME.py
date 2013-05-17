@@ -8,7 +8,7 @@ from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from multiprocessing import Pool
 from random import gauss, sample
-from numpy import dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, power, ceil, prod, zeros, concatenate
+from numpy import dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, concatenate
 from numpy.random import rand
 from itertools import repeat, chain, izip
 from pygr import seqdb
@@ -290,8 +290,31 @@ Output:
 Is, list of Q sampled indicator matrices
 """
 def sampleIndicator(I, nlist, n, Q):
-    indices = sample(xrange(n),Q)
-    sequenceindices = #start here 5/14/13
+    indices = sample(xrange(n),Q)#sampled indices
+    seqindices = [bisect_left(nlist, ind) for ind in indices]
+    Is = [I[seqind][ind - nlist[seqind] - 1] for seqind, ind in zip(seqindices,indices)]#which sequences to use
+    #note the subtraction. we are indexing from the right here
+    return Is
+
+"""
+The relative entropy per column, RE/col. A measure of the "crispness" of the motif.
+
+Input:
+theta_motif, motif PWM matrix
+theta_background_matrix, background PWM matrix
+
+Output:
+recol, the relative entropy per column
+"""
+def relEntCol(theta_motif, theta_background_matrix):
+    W = theta_motif.shape[0]
+    recol = 1.0/W*(theta_motif*log(theta_motif/theta_background_matrix)).sum()
+    return recol
+
+"""
+5/6/13 Start here
+"""
+def startingPoint():
     return 0
 
 """
@@ -321,9 +344,9 @@ def meme(Y,W,NPASSES):
         b = a + log2(sqrt(N)/n) 
         lambda0s = power(2,b)#array holding the heuristic initial lambda values to try
         for lambda0 in lambda0s:
-            Q = log2(1-alpha)/log2(1-lambda0)#number of sequences to sample to catch motif with prob alpha
-            for j in sample(xrange(n),ceil(Q)):#guarantee to sample at least one sequence with motif
-                seq = X[j]#pick subsequence j
+            Q = ceil(log2(1-alpha)/log2(1-lambda0))#number of sequences to sample to catch motif with prob alpha
+            sampledIndicators = sampleIndicator(I, nlist, n, Q)#guarantee to sample at least one sequence with motif with alpha confidence
+            for sampledI in sampledIndicators:
     
 
 if __name__ == "__main__":
