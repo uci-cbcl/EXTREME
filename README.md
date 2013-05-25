@@ -6,6 +6,10 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+5/25/13:
+Finished bulk of the main MEME algorithm. Must now work on output and actually
+running it.
+
 5/16/13:
 Completed the random sampling of subsequences and relative entropy per column. Work on deriving starting points next.
 
