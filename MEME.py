@@ -14,7 +14,6 @@ from itertools import repeat, chain, izip
 from pygr import seqdb
 from bisect import bisect_left
 
-
 """
 Equation 14 from the Bailey and Elkan paper. Calculates P(X|theta_motif). That is,
 the probability of the sequence given the motif model. It is defined as the product
@@ -590,17 +589,17 @@ def meme(Y,W,NPASSES):
                 
 if __name__ == "__main__":
     usage = "usage: %prog [options] <input FASTA>"
-    description = "This program generates a FASTA file containing randomized sequences appropriate for analysis by OnlineMEME"
+    description = "The program applies the Batch MEME algorithm to find motifs in a FASTA file"
     parser = OptionParser(usage=usage,description=description)
     parser.add_option("-p", "--processes", help="optional number of parallelized processes")
-    parser.add_option("-m", "--motif", help="File holding motif(s). Default: no motifs")
-    parser.add_option("-b", "--background", help="Background file. Default: 0-order equal distribution")    
-    parser.add_option("-n", "--numsequences", help="Number of sequences to write. Default:100", default="100")
-    parser.add_option("-f", "--fraction", help="Fraction of sequences containing motif. Default:0.5", default="0.5")    
+    parser.add_option("-w", "--width", help="File holding motif(s). Default: no motifs", default="10")
+    parser.add_option("-n", "--nummotifs", help="Number of sequences to write. Default:100", default="1")
     (options, args) = parser.parse_args()
+    w = int(options.width)
+    nmotifs = int(options.nummotifs)
     if len(args) == 1:#the program is correctly used, so do MEME
         sp = seqdb.SequenceFileDB(args[0])
-        meme(sp,10,1)
+        meme(sp,w,nmotifs)
         sp.close()
     else:
         parser.print_help()

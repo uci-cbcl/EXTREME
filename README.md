@@ -6,6 +6,19 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+6/27/13:
+Tested the Batch MEME algorithm on a test set of data. The test data consisted of 10000 sequences. Each sequence
+was 10 bp long. Half of the sequenced were generated from a uniform background. The other half were generated
+from the NRF1 motif. The batch algorithm correctly called the motif and the fraction using the heuristic for
+maximum expectation. The algorithm can not yet handle erasure or priors.
+Added minimum width and number of motifs to find option to Batch MEME.
+
+5/27/13:
+Got the EM and heuristics part working. Need to figure out how to speed up
+the heuristics part, way too slow. Perhaps use multiprocessing? Exported
+the NRSF PWM as a numpy array. Should use this as a starting point. The current
+starting points are not working well.
+
 5/25/13:
 Finished bulk of the main MEME algorithm. Must now work on output and actually
 running it.
@@ -25,3 +38,4 @@ Clearly, pygr indexing is much slower than direct memory access. However, conver
 Based on my estimates, it will take twice as long reading from pygr each time compared to converting all to strings first. For the regular MEME version, I will load all into
 memory, but I should keep in mind that for the Online version memory will be a constraint.
 M00256.pfm is a motif file in the MotifList format corresponding to NRSF
+M00652.pfm is a motif file in the MotifList format corresponding to NRF1
