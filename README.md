@@ -6,6 +6,10 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+6/28/13:
+Finished writing the prototype for the Online MEME algorithm. Assumes the FASTA file holds sequences with one subsequence each.
+Will test on the NRF1_TestMotif.fasta file.
+
 6/27/13:
 Tested the Batch MEME algorithm on a test set of data. The test data consisted of 10000 sequences. Each sequence
 was 10 bp long. Half of the sequenced were generated from a uniform background. The other half were generated
