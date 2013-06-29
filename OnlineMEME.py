@@ -196,19 +196,22 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
     s2_2 = theta_background_matrix#the matrix holding the expected number of times a letter appears in each position, background
     n = 1#the counter
-    for y in Y:#iterate through each sequence in the FASTA file
-        I = sequenceToI(str(y))#convert the FASTA sequence to a string and then an indicator matrix
-        step = 0.85#the online step size. May need to change this
+    for y in Y:#iterate through each key in the FASTA file
+        I = sequenceToI(str(Y[y]))#convert the FASTA sequence to a string and then an indicator matrix
+        step = 0.025*pow(n,-0.6)#the online step size. May need to change this
         #E-step
         ds1_1 = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif)
+        #print y
         ds1_2 = ds1_1*I
         ds2_2 = (1-ds1_1)*I
         s1_1 = s1_1 + step*(ds1_1 - s1_1)
         s1_2 = s1_2 + step*(ds1_2 - s1_2)
+        #print s1_2
         s2_2 = s2_2 + step*(ds2_2 - s2_2)
         #M-step
         lambda_motif = s1_1
         theta_motif = s1_2
+        theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
         theta_background = s2_2.sum(axis = 0)#collapse the expected background counts into a single array
         theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
         theta_background = array([theta_background])#prepare background for repeat
@@ -247,7 +250,7 @@ def meme(Y,W,NPASSES):
     #6/28/13, check with initial conditions matching solution
     lambda_motif = 0.5
     theta_motif = load('NRF1_Motif.npy')
-    theta_uniform_background = array([[0.25, 0.25, 0.25, 0.25]])
+    theta_uniform_background = array([[0.23, 0.27, 0.24, 0.26]])
     theta_uniform_background_matrix = theta_uniform_background.repeat(W,axis=0)#the initial guess for background is uniform distribution
     theta_motif, theta_background_matrix, lambda_motif = Online_EM(Y, theta_motif, theta_uniform_background_matrix, lambda_motif)
     outputMotif(lambda_motif, theta_motif, theta_background_matrix)

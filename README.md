@@ -6,6 +6,9 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+6/29/13:
+Changed the step size forumla. Works pretty well so far. Perturbed background model and it performed fairly well. Needs more testing.
+
 6/28/13:
 Finished writing the prototype for the Online MEME algorithm. Assumes the FASTA file holds sequences with one subsequence each.
 Will test on the NRF1_TestMotif.fasta file.
