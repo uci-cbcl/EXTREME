@@ -8,6 +8,8 @@ Notes
 -----
 6/29/13:
 Changed the step size forumla. Works pretty well so far. Perturbed background model and it performed fairly well. Needs more testing.
+It appears that OLO6a has superior performance to OLO6. For the current perturbed initial conditions, OLO6a converged better to correct
+solution. Should do more parameter testing just to make sure.
 
 6/28/13:
 Finished writing the prototype for the Online MEME algorithm. Assumes the FASTA file holds sequences with one subsequence each.

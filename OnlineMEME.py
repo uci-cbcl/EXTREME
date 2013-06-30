@@ -195,10 +195,18 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     s1_1 = lambda_motif#the expected number of occurrences of the motif
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
     s2_2 = theta_background_matrix#the matrix holding the expected number of times a letter appears in each position, background
-    n = 1#the counter
+    n = 0#the counter
+    nstart = 1000#when to start averaging
+    N = len(Y)#number of observations
+    #reserve some memory
+    fractions = zeros(N)
+    pwms = zeros((N,W,4))
+    backgrounds = zeros((N,4))
     for y in Y:#iterate through each key in the FASTA file
         I = sequenceToI(str(Y[y]))#convert the FASTA sequence to a string and then an indicator matrix
-        step = 0.025*pow(n,-0.6)#the online step size. May need to change this
+        step = 0.057*pow(n+1,-0.6)#the online step size. For OLO6a
+        #step = 0.025*pow(n+1,-0.6)#the online step size. For OLO6a
+        #step = 1.0/10000
         #E-step
         ds1_1 = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif)
         #print y
@@ -216,6 +224,20 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
         theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
         theta_background = array([theta_background])#prepare background for repeat
         theta_background_matrix = theta_background.repeat(W,axis=0)
+        #save current parameters
+        fractions[n] = lambda_motif
+        pwms[n] = theta_motif
+        backgrounds[n] = theta_background
+        #if n > nstart, then start using averaged parameters for the upcoming E-step
+        #have to repeat the normalization to ensure probability is properly conserved
+        if n > nstart:
+            lambda_motif = fractions[n/2:].mean(axis=0)#new fraction is mean of previous fractions
+            theta_motif = pwms[n/2:].mean(axis=0)#new pwm is mean of previous pwms
+            theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
+            theta_background = backgrounds[n/2:].mean(axis=0)#new background is mean of previous backgrounds
+            theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
+            theta_background = array([theta_background])#prepare background for repeat
+            theta_background_matrix = theta_background.repeat(W,axis=0)
         #update the counter
         n = n + 1
     return theta_motif, theta_background_matrix, lambda_motif
@@ -248,9 +270,10 @@ That is, Y = X.
 """
 def meme(Y,W,NPASSES):
     #6/28/13, check with initial conditions matching solution
-    lambda_motif = 0.5
+    lambda_motif = 0.3
     theta_motif = load('NRF1_Motif.npy')
-    theta_uniform_background = array([[0.23, 0.27, 0.24, 0.26]])
+    theta_motif[0] = array([0.25,0.25,0.25,0.25])
+    theta_uniform_background = array([[0.2, 0.3, 0.2, 0.3]])
     theta_uniform_background_matrix = theta_uniform_background.repeat(W,axis=0)#the initial guess for background is uniform distribution
     theta_motif, theta_background_matrix, lambda_motif = Online_EM(Y, theta_motif, theta_uniform_background_matrix, lambda_motif)
     outputMotif(lambda_motif, theta_motif, theta_background_matrix)
