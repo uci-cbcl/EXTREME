@@ -6,6 +6,10 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+7/1/13:
+The code works better if the data is actually randomized... May just use the OLO6 method to save memory. Seems to be a tradeoff
+between convergence rate and accuracy/consistency.
+
 6/29/13:
 Changed the step size forumla. Works pretty well so far. Perturbed background model and it performed fairly well. Needs more testing.
 It appears that OLO6a has superior performance to OLO6. For the current perturbed initial conditions, OLO6a converged better to correct

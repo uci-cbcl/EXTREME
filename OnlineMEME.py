@@ -7,7 +7,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from multiprocessing import Pool
-from random import gauss, sample
+from random import gauss, sample, shuffle
 from numpy import load,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, concatenate
 from numpy.random import rand
 from itertools import repeat, chain, izip
@@ -196,15 +196,20 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
     s2_2 = theta_background_matrix#the matrix holding the expected number of times a letter appears in each position, background
     n = 0#the counter
-    nstart = 1000#when to start averaging
+    nstart = 50000#when to start averaging
     N = len(Y)#number of observations
     #reserve some memory
     fractions = zeros(N)
     pwms = zeros((N,W,4))
     backgrounds = zeros((N,4))
-    for y in Y:#iterate through each key in the FASTA file
+    fractions_sum = 0
+    pwms_sum = zeros((W,4))
+    backgrounds_sum = zeros((W,4))
+    keys = Y.keys()
+    shuffle(keys)
+    for y in keys:#iterate through each key in the FASTA file
         I = sequenceToI(str(Y[y]))#convert the FASTA sequence to a string and then an indicator matrix
-        step = 0.057*pow(n+1,-0.6)#the online step size. For OLO6a
+        step = 0.1*pow(n+1,-0.6)#the online step size. For OLO6a
         #step = 0.025*pow(n+1,-0.6)#the online step size. For OLO6a
         #step = 1.0/10000
         #E-step
@@ -228,18 +233,33 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
         fractions[n] = lambda_motif
         pwms[n] = theta_motif
         backgrounds[n] = theta_background
+        fractions_sum = fractions_sum + lambda_motif
+        pwms_sum = pwms_sum + theta_motif
+        backgrounds_sum = backgrounds_sum + theta_background_matrix
         #if n > nstart, then start using averaged parameters for the upcoming E-step
         #have to repeat the normalization to ensure probability is properly conserved
         if n > nstart:
-            lambda_motif = fractions[n/2:].mean(axis=0)#new fraction is mean of previous fractions
-            theta_motif = pwms[n/2:].mean(axis=0)#new pwm is mean of previous pwms
+            lambda_motif = fractions[n/2:n].mean(axis=0)#new fraction is mean of previous fractions
+            theta_motif = pwms[n/2:n].mean(axis=0)#new pwm is mean of previous pwms
             theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
-            theta_background = backgrounds[n/2:].mean(axis=0)#new background is mean of previous backgrounds
+            theta_background = backgrounds[n/2:n].mean(axis=0)#new background is mean of previous backgrounds
             theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
             theta_background = array([theta_background])#prepare background for repeat
             theta_background_matrix = theta_background.repeat(W,axis=0)
+            """
+            lambda_motif = fractions_sum/(n+1)
+            theta_motif = pwms_sum/(n+1)
+            theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
+            theta_background_matrix = backgrounds_sum/(n+1)
+            theta_background_matrix = theta_background_matrix/theta_background_matrix.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
+            """
         #update the counter
         n = n + 1
+    import pylab
+    x = load('NRF1_Motif.npy')
+    pylab.plot([dist(x,y) for y in pwms])
+    #pylab.plot(fractions)
+    pylab.show()
     return theta_motif, theta_background_matrix, lambda_motif
     #E-step, this may be superfluous
     #Z, c0, c = E(I, theta_motif, theta_background_matrix, lambda_motif)
@@ -270,10 +290,9 @@ That is, Y = X.
 """
 def meme(Y,W,NPASSES):
     #6/28/13, check with initial conditions matching solution
-    lambda_motif = 0.3
-    theta_motif = load('NRF1_Motif.npy')
-    theta_motif[0] = array([0.25,0.25,0.25,0.25])
-    theta_uniform_background = array([[0.2, 0.3, 0.2, 0.3]])
+    lambda_motif = 0.05
+    theta_motif = load('NRF1_test.npy')
+    theta_uniform_background = array([[0.25, 0.25, 0.25, 0.25]])
     theta_uniform_background_matrix = theta_uniform_background.repeat(W,axis=0)#the initial guess for background is uniform distribution
     theta_motif, theta_background_matrix, lambda_motif = Online_EM(Y, theta_motif, theta_uniform_background_matrix, lambda_motif)
     outputMotif(lambda_motif, theta_motif, theta_background_matrix)
