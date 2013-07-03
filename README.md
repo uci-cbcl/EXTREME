@@ -6,6 +6,13 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+7/2/13:
+Tested the efficacy of averaging. Confirmed what the Online EM paper said. Smaller initial step removes bias, lowers variance,
+but slows convergence. Averaging can lower the variance for bigger initial steps, but requires memory to store past parameters.
+General rule of thumb: only use averaging if you do not have that many samples. If you have a lot of samples, then just use 
+a small initial step, since the Online EM algorithm will converge to the true parameters before it reaches the last observation.
+Next step: modify Online MEME to handle multiple subsequences per sequence.
+
 7/1/13:
 The code works better if the data is actually randomized... May just use the OLO6 method to save memory. Seems to be a tradeoff
 between convergence rate and accuracy/consistency.

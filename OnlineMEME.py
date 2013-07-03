@@ -196,7 +196,7 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
     s2_2 = theta_background_matrix#the matrix holding the expected number of times a letter appears in each position, background
     n = 0#the counter
-    nstart = 50000#when to start averaging
+    nstart = 5000#when to start averaging
     N = len(Y)#number of observations
     #reserve some memory
     fractions = zeros(N)
@@ -257,8 +257,8 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
         n = n + 1
     import pylab
     x = load('NRF1_Motif.npy')
-    pylab.plot([dist(x,y) for y in pwms])
-    #pylab.plot(fractions)
+    #pylab.plot([dist(x,y) for y in pwms])
+    pylab.plot(fractions)
     pylab.show()
     return theta_motif, theta_background_matrix, lambda_motif
     #E-step, this may be superfluous
@@ -290,7 +290,7 @@ That is, Y = X.
 """
 def meme(Y,W,NPASSES):
     #6/28/13, check with initial conditions matching solution
-    lambda_motif = 0.05
+    lambda_motif = 0.3
     theta_motif = load('NRF1_test.npy')
     theta_uniform_background = array([[0.25, 0.25, 0.25, 0.25]])
     theta_uniform_background_matrix = theta_uniform_background.repeat(W,axis=0)#the initial guess for background is uniform distribution
