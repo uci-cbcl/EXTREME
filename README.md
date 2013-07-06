@@ -6,6 +6,11 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+7/5/13:
+Added long sequence functionality to Online-MEME. Get same results as batch mode for 12-bp long NRF1 example. However,
+Batch MEME, Online MEME, and even the web-based MEME fails for longer NRF1 sequences. Also changed the way parameters are stored.
+Next step is to plot the expected-likelihood and account for reverse complements.
+
 7/2/13:
 Tested the efficacy of averaging. Confirmed what the Online EM paper said. Smaller initial step removes bias, lowers variance,
 but slows convergence. Averaging can lower the variance for bigger initial steps, but requires memory to store past parameters.
