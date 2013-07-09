@@ -8,7 +8,7 @@ from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from multiprocessing import Pool
 from random import gauss, sample
-from numpy import load,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, concatenate
+from numpy import save, load,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, concatenate
 from numpy.random import rand
 from itertools import repeat, chain, izip
 from pygr import seqdb
@@ -342,16 +342,21 @@ def EM_troubleshoot(I, n, theta_motif, theta_background_matrix, lambda_motif, TO
     #Z, c0, c = E(I, theta_motif, theta_background_matrix, lambda_motif)
     #M-step, this may be superfluous
     #lambda_motif, theta_motif, theta_background_matrix = M(Z, n, c0, c)
+    expectations = list()
     for k in xrange(MAXITER):
         theta_motif_old = theta_motif#this is the only thing I need to save
         #E-step
         Z, c0, c, expected_LogLikelihood = Expectation(I, theta_motif, theta_background_matrix, lambda_motif)
+        expectations.append(expected_LogLikelihood)
         print "Step " + str(k) + ":" + " " + str(expected_LogLikelihood)
         print theta_motif
         #M-step
         lambda_motif, theta_motif, theta_background_matrix = M(Z, n, c0, c)
         if dist(theta_motif, theta_motif_old) < TOL:
             break
+    Z, c0, c, expected_LogLikelihood = Expectation(I, theta_motif, theta_background_matrix, lambda_motif)
+    expectations.append(expected_LogLikelihood)
+    save('the_expectations', expectations)
     return lambda_motif, theta_motif, theta_background_matrix, k
 
 """
@@ -518,7 +523,7 @@ Assume that each sequence is the size of the motif for now.
 That is, Y = X.
 """
 def meme(Y,W,NPASSES):
-    X = getSubsequences(Y,W)#this step may need to be moved for Online to save RAM
+    X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
     #subsequences are grouped by sequences for normalization purposes
     I = [[sequenceToI(xij) for xij in xi] for xi in X]#list of indicator matrices, same dimensions as X
     nlist = array([len(x) for x in X])#a list of the number of subsequences corresponding to each sequence

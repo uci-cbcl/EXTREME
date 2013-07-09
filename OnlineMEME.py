@@ -8,7 +8,7 @@ from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from multiprocessing import Pool
 from random import gauss, sample, shuffle
-from numpy import load,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, concatenate
+from numpy import mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, concatenate
 from numpy.random import rand
 from itertools import repeat, chain, izip
 from pygr import seqdb
@@ -100,6 +100,28 @@ def sequenceToI(X):
     return I
 
 """
+Computes a term in the summation, equation 11.
+
+This is a modified version that uses the indicator matrix instead. Saves the trouble
+of calculating the indicator matrix at each step. 
+
+Input:
+I, indicator matrix. Represents a sequence.
+theta_motif, a matrix. The PWM of the motif.
+theta_background_matrix, a matrix. Essentially a PWM of the background model.
+lambda_motif, a double. The fraction of motifs among the sequences.
+
+Output:
+elogL - a summation term of equation 11
+"""
+def expLog_I(I,theta_motif, theta_background_matrix,lambda_motif):
+    a = pI_motif(I,theta_motif)*lambda_motif#saves a calculation
+    b = pI_background(I,theta_background_matrix)*(1-lambda_motif)#saves another calculation
+    Z0 = a/(a + b)
+    elogL = Z0*log(a) + (1-Z0)*log(b)
+    return elogL
+
+"""
 Calculates the expected log likelihood. Accepts the list of indicator matrices I, the current motif
 frequency lambda_motif, and both PWMs. Returns the expected log likelihood.
 
@@ -116,10 +138,14 @@ lambda_motif, a double. The fraction of motifs among the sequences.
 Output:
 expected_LogLikelihood, the expected log likelihood
 
-7/5/13: Wprk on this next
+7/5/13: Work on this next
 """
 def expected_LogLikelihood(I, theta_motif, theta_background_matrix, lambda_motif):
-    return 0
+    expected_LogLikelihood = 0
+    for Ii in I:
+        for Iij in Ii:
+            expected_LogLikelihood = expected_LogLikelihood + expLog_I(Iij,theta_motif, theta_background_matrix,lambda_motif)
+    return expected_LogLikelihood
 
 """
 Absolute Euclidean distance between two arrays, u and v. This function
@@ -137,6 +163,23 @@ def dist(u,v):
     return sqrt(w.sum())
 
 """
+Function that returns a list of subsequences, X,
+of width W, from the dataset of sequences, Y.
+It is effectively a ragged array
+
+Input:
+Y, dataset of sequences. A pygr SequenceFileDB object 
+W, motif width
+
+Notes:
+For the Online version, this may need to be removed for RAM purposes.
+"""
+def getSubsequences(Y, W):
+    return [[str(Y[y][k:k+W]) for k in xrange(len(Y[y])-W+1)] for y in Y]
+
+
+
+"""
 The EM algorithm. 
 
 Input:
@@ -152,11 +195,14 @@ lambda_motif, motif frequency
 """
 def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     W = theta_motif.shape[0]#get the length of the motif
+    X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
+    #subsequences are grouped by sequences for normalization purposes
+    Is = [[sequenceToI(xij) for xij in xi] for xi in X]#list of indicator matrices, same dimensions as X
     s1_1 = lambda_motif#the expected number of occurrences of the motif
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
     s2_2 = theta_background_matrix#the matrix holding the expected number of times a letter appears in each position, background
     n = 0#the counter
-    nstart = 50000000#when to start averaging
+    nstart = 10000#when to start averaging
     N = len(Y)#number of observations
     #reserve some memory. this was when each sequence had only one subsequence
     """fractions = zeros(N)
@@ -167,18 +213,20 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     fractions = list()
     pwms = list()
     backgrounds = list()
+    expectations = list()
     fractions_sum = 0#should be deleted
     pwms_sum = zeros((W,4))#should be deleted
     backgrounds_sum = zeros((W,4))#should be deleted
     keys = Y.keys()
     shuffle(keys)
+    expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
     for y in keys:#iterate through each key in the FASTA file
         s = str(Y[y])#grab the whole sequence as a string
         L = len(s)#length of sequence
         starts = range(0,L-W+1)
         for start in starts:
             I = sequenceToI(s[start:start+W])#convert the subsequence to an indicator matrix
-            step = 0.05*pow(n+1,-0.6)#the online step size. For OLO6a
+            step = 0.1*pow(n+1,-0.6)#the online step size. For OLO6a
             #step = 0.025*pow(n+1,-0.6)#the online step size. For OLO6a
             #step = 1.0/10000
             #E-step
@@ -212,12 +260,12 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
             #if n > nstart, then start using averaged parameters for the upcoming E-step
             #have to repeat the normalization to ensure probability is properly conserved
             if n > nstart:
-                lambda_motif = fractions[n/2:n].mean(axis=0)#new fraction is mean of previous fractions
-                theta_motif = pwms[n/2:n].mean(axis=0)#new pwm is mean of previous pwms
+                lambda_motif = mean(fractions[n/2:n],axis=0)#new fraction is mean of previous fractions
+                theta_motif = mean(pwms[n/2:n],axis=0)#new pwm is mean of previous pwms
                 theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
-                theta_background = backgrounds[n/2:n].mean(axis=0)#new background is mean of previous backgrounds
+                theta_background = mean(backgrounds[n/2:n],axis=0)#new background is mean of previous backgrounds
                 theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
-                theta_background = array([theta_background])#prepare background for repeat
+                #theta_background = array([theta_background])#prepare background for repeat
                 theta_background_matrix = theta_background.repeat(W,axis=0)
                 """
                 lambda_motif = fractions_sum/(n+1)
@@ -228,12 +276,16 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
                 """
             #update the counter
             n = n + 1
+            print n
+            #the expected log likelihood, the objective function, based on current parameters
+            expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
     import pylab
     print s1_2
     x = load('NRF1_Motif.npy')
     #pylab.plot([dist(x,y) for y in pwms])
-    pylab.plot(fractions)
+    pylab.plot(expectations)
     pylab.show()
+    save('the_expectations', expectations)
     return theta_motif, theta_background_matrix, lambda_motif
     #E-step, this may be superfluous
     #Z, c0, c = E(I, theta_motif, theta_background_matrix, lambda_motif)
@@ -264,7 +316,7 @@ That is, Y = X.
 """
 def meme(Y,W,NPASSES):
     #6/28/13, check with initial conditions matching solution
-    lambda_motif = 0.2
+    lambda_motif = 0.3
     theta_motif = load('NRF1_test.npy')
     theta_uniform_background = array([[0.25, 0.25, 0.25, 0.25]])
     theta_uniform_background_matrix = theta_uniform_background.repeat(W,axis=0)#the initial guess for background is uniform distribution

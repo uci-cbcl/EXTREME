@@ -6,6 +6,11 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+7/8/13:
+The algorithms can now save and plot the expected log likelihood at each iteration. As expected, both algorithms
+asymptotically reach a maximum, although only the batch algorithm reaches the global maximum. Tested on a NRF1
+mock data set, 5000 sequences of length 10, 50% motif fraction. Also corrected some spelling errors.
+
 7/5/13:
 Added long sequence functionality to Online-MEME. Get same results as batch mode for 12-bp long NRF1 example. However,
 Batch MEME, Online MEME, and even the web-based MEME fails for longer NRF1 sequences. Also changed the way parameters are stored.
