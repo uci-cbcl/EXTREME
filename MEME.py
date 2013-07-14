@@ -10,6 +10,8 @@ from multiprocessing import Pool
 from random import gauss, sample
 from numpy import save, load,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, concatenate
 from numpy.random import rand
+from pylab import imread, imshow, plot, show
+from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, unambiguous_dna_alphabet
 from itertools import repeat, chain, izip
 from pygr import seqdb
 from bisect import bisect_left
@@ -286,6 +288,26 @@ def dist(u,v):
     return sqrt(w.sum())
 
 """
+The smooth algorithm from Bailey and Elkan 1993. Constrains the sum of expectations in any window of width W to sum no
+more than 1.
+
+Input:
+Z - a list of expected values. Its length is L - W + 1, where L is the length of the original sequence
+W - the width of the motif
+
+Output:
+Z - the list of expected values normalized so that sums in any window of width W sum to 1 or less 
+"""
+def smooth(Z,W):
+    for offset in range(W):
+        for j in range(offset, len(Z) - W + 1, W):
+            local = Z[j:j+W]
+            localp = sum(local)
+            if localp > 1:
+                Z[j:j+W] = [l/localp for l in local]
+    return Z
+
+"""
 The EM algorithm. 
 
 Input:
@@ -338,6 +360,7 @@ lambda_motif, motif frequency
 k, number of iterations performed
 """
 def EM_troubleshoot(I, n, theta_motif, theta_background_matrix, lambda_motif, TOL=1E-6, MAXITER=1000):
+    W = theta_motif.shape[0]#width of motif
     #E-step, this may be superfluous
     #Z, c0, c = E(I, theta_motif, theta_background_matrix, lambda_motif)
     #M-step, this may be superfluous
@@ -350,6 +373,9 @@ def EM_troubleshoot(I, n, theta_motif, theta_background_matrix, lambda_motif, TO
         expectations.append(expected_LogLikelihood)
         print "Step " + str(k) + ":" + " " + str(expected_LogLikelihood)
         print theta_motif
+        #normalize z values
+        for z in Z:
+            smooth(z,W)
         #M-step
         lambda_motif, theta_motif, theta_background_matrix = M(Z, n, c0, c)
         if dist(theta_motif, theta_motif_old) < TOL:
@@ -357,6 +383,9 @@ def EM_troubleshoot(I, n, theta_motif, theta_background_matrix, lambda_motif, TO
     Z, c0, c, expected_LogLikelihood = Expectation(I, theta_motif, theta_background_matrix, lambda_motif)
     expectations.append(expected_LogLikelihood)
     save('the_expectations', expectations)
+    import pylab
+    pylab.plot(expectations)
+    pylab.show()
     return lambda_motif, theta_motif, theta_background_matrix, k
 
 """
@@ -498,13 +527,16 @@ theta_motif - a numpy array, the PWM
 theta_background_matrix - a numpy array, the background model
 """
 def outputMotif(lambda_motif, theta_motif, theta_background_matrix):
-    c = theta_motif.T
-    d = {'A':c[0],'C':c[1],'G':c[2],'T':c[3]}
-    m = motifs.Motif(alphabet=IUPAC.unambiguous_dna,counts=d)
-    b = theta_background_matrix[0]
-    back = {'A':b[0],'C':b[1],'G':b[2],'T':b[3]}
-    m.background = back
-    m.weblogo('results.png')
+    data = LogoData.from_counts(counts=theta_motif,alphabet=unambiguous_dna_alphabet)
+    options = LogoOptions()
+    options.title = 'Motif'
+    forma = LogoFormat(data, options)
+    fout = open('results.png', 'w')
+    png_formatter(data, forma, fout)
+    fout.close()
+    img = imread('results.png')
+    imshow(img)
+    show()
     #for now, just print, but will have to output a png later
     print lambda_motif
     print theta_motif
@@ -550,8 +582,8 @@ def meme(Y,W,NPASSES):
         a = arange(0,log2(n/(2*W*sqrt(N)))+1,1)#the +1 ensures the last guess included
         b = a + log2(sqrt(N)/n) 
         lambda0s = power(2,b)#array holding the heuristic initial lambda values to try
-        lambda0s = lambda0s[-1:]#for now only want the last guessed lambda
-        lambda0s = [0.3]
+        lambda0s = lambda0s[-3:]#for now only want the last guessed lambda
+        #lambda0s = [0.3]
         print lambda0s#troubleshooting
         Qs = [int(ceil(log2(1-alpha)/log2(1-lambda0))) for lambda0 in lambda0s]
         print Qs#for troubleshooting
@@ -584,12 +616,12 @@ def meme(Y,W,NPASSES):
                     theta_background_matrix = theta_background_matrix_updated#current best guess background model
                 print dx
                 dx = dx + 1
-            #now run EM algorithm on the current best guess
-            print 'Running EM'
-            lambda_motif, theta_motif, theta_background_matrix, k = EM_troubleshoot(I, n, theta_motif, theta_background_matrix, lambda_motif)
-            print 'Iterations'
-            print k
-            outputMotif(lambda_motif, theta_motif, theta_background_matrix)
+        #now run EM algorithm on the current best guess
+        print 'Running EM'
+        lambda_motif, theta_motif, theta_background_matrix, k = EM_troubleshoot(I, n, theta_motif, theta_background_matrix, lambda_motif)
+        print 'Iterations'
+        print k
+        outputMotif(lambda_motif, theta_motif, theta_background_matrix)
             
                 
 if __name__ == "__main__":
@@ -597,8 +629,8 @@ if __name__ == "__main__":
     description = "The program applies the Batch MEME algorithm to find motifs in a FASTA file"
     parser = OptionParser(usage=usage,description=description)
     parser.add_option("-p", "--processes", help="optional number of parallelized processes")
-    parser.add_option("-w", "--width", help="File holding motif(s). Default: no motifs", default="10")
-    parser.add_option("-n", "--nummotifs", help="Number of sequences to write. Default:100", default="1")
+    parser.add_option("-w", "--width", help="Width of motif to search for", default="10")
+    parser.add_option("-n", "--nummotifs", help="Number of motifs to discover", default="1")
     (options, args) = parser.parse_args()
     w = int(options.width)
     nmotifs = int(options.nummotifs)

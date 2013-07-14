@@ -6,6 +6,12 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+7/13/13:
+Added the smooth function to the Batch MEME algorithm. Also added the weblogo display to Batch MEME. Batch MEME displays the
+plot of expected log likelihoods at the end of the Batch MEME algorithm. Tested a dataset with 100 sequences, 80% of which contain
+the NRSF motif. The official MEME and the Batch MEME algorithm correctly found the motif. Must test this on Online MEME next.
+Then will add smoothing feature to Online MEME and account for reverse complements.
+
 7/8/13:
 The algorithms can now save and plot the expected log likelihood at each iteration. As expected, both algorithms
 asymptotically reach a maximum, although only the batch algorithm reaches the global maximum. Tested on a NRF1

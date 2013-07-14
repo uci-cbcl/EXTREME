@@ -8,8 +8,10 @@ from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from multiprocessing import Pool
 from random import gauss, sample, shuffle
-from numpy import mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, concatenate
+from numpy import mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, ones, concatenate
 from numpy.random import rand
+from pylab import imread, imshow, plot, show
+from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, unambiguous_dna_alphabet
 from itertools import repeat, chain, izip
 from pygr import seqdb
 from bisect import bisect_left
@@ -177,6 +179,28 @@ For the Online version, this may need to be removed for RAM purposes.
 def getSubsequences(Y, W):
     return [[str(Y[y][k:k+W]) for k in xrange(len(Y[y])-W+1)] for y in Y]
 
+"""
+A function to account for repetitive elements. Counts the number
+of overlapping W-mers at each site on the sequence.
+
+Input:
+X, a string. The nucleotide sequence
+W, motif width
+
+Output:
+counts, array of overlap occurrences. Length of L - W + 1
+"""
+def overlap_occurrences(X, W):
+    L = len(X)
+    counts = ones(L-W+1)
+    for i in range(L-W):
+        s = X[i:i+W]
+        for j in range(1,W):
+            t = X[i+j:i+j+W]
+            if s == t:
+                counts[i] = counts[i] + 1
+                counts[i+j] = counts[i+j] + 1
+    return counts
 
 
 """
@@ -279,12 +303,11 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
             print n
             #the expected log likelihood, the objective function, based on current parameters
             expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
-    import pylab
     print s1_2
     x = load('NRF1_Motif.npy')
     #pylab.plot([dist(x,y) for y in pwms])
-    pylab.plot(expectations)
-    pylab.show()
+    plot(expectations)
+    show()
     save('the_expectations', expectations)
     return theta_motif, theta_background_matrix, lambda_motif
     #E-step, this may be superfluous
@@ -332,13 +355,16 @@ theta_motif - a numpy array, the PWM
 theta_background_matrix - a numpy array, the background model
 """
 def outputMotif(lambda_motif, theta_motif, theta_background_matrix):
-    c = theta_motif.T
-    d = {'A':c[0],'C':c[1],'G':c[2],'T':c[3]}
-    m = motifs.Motif(alphabet=IUPAC.unambiguous_dna,counts=d)
-    b = theta_background_matrix[0]
-    back = {'A':b[0],'C':b[1],'G':b[2],'T':b[3]}
-    m.background = back
-    m.weblogo('results.png')
+    data = LogoData.from_counts(counts=theta_motif,alphabet=unambiguous_dna_alphabet)
+    options = LogoOptions()
+    options.title = 'Motif'
+    forma = LogoFormat(data, options)
+    fout = open('results.png', 'w')
+    png_formatter(data, forma, fout)
+    fout.close()
+    img = imread('results.png')
+    imshow(img)
+    show()
     #for now, just print, but will have to output a png later
     print lambda_motif
     print theta_motif
@@ -349,8 +375,8 @@ if __name__ == "__main__":
     description = "The program applies the Online MEME algorithm to find motifs in a FASTA file"
     parser = OptionParser(usage=usage,description=description)
     parser.add_option("-p", "--processes", help="optional number of parallelized processes")
-    parser.add_option("-w", "--width", help="File holding motif(s). Default: no motifs", default="10")
-    parser.add_option("-n", "--nummotifs", help="Number of sequences to write. Default:100", default="1")
+    parser.add_option("-w", "--width", help="Width of the motif to search for", default="10")
+    parser.add_option("-n", "--nummotifs", help="Number of motifs to search for", default="1")
     (options, args) = parser.parse_args()
     w = int(options.width)
     nmotifs = int(options.nummotifs)
