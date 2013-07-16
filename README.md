@@ -6,6 +6,13 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+7/15/13:
+MEME-chip sucks. Downloaded K562 NRSF (1st replicate) broadpeaks file from Myers lab ENCODE as a real world dataset. gamma_0=0.2
+seems to be the sweet spot. Used a simulated dataset of NRSF, mean length 100, 80% of sequences contain motif, 1000 sequences.
+Online MEME worked very fast, but plots appear "jagged", even when subsequences were shuffled. I have to figure out how to do
+Online smoothing next.
+
+
 7/13/13:
 Added the smooth function to the Batch MEME algorithm. Also added the weblogo display to Batch MEME. Batch MEME displays the
 plot of expected log likelihoods at the end of the Batch MEME algorithm. Tested a dataset with 100 sequences, 80% of which contain
