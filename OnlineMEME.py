@@ -15,6 +15,7 @@ from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, unambig
 from itertools import repeat, chain, izip
 from pygr import seqdb
 from bisect import bisect_left
+import functools
 
 """
 Equation 14 from the Bailey and Elkan paper. Calculates P(X|theta_motif). That is,
@@ -226,7 +227,7 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
     s2_2 = theta_background_matrix#the matrix holding the expected number of times a letter appears in each position, background
     n = 0#the counter
-    nstart = 10000000#when to start averaging
+    nstart = 100000000#when to start averaging
     N = len(Y)#number of observations
     #reserve some memory. this was when each sequence had only one subsequence
     """fractions = zeros(N)
@@ -251,7 +252,7 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
         shuffle(starts)
         for start in starts:
             I = sequenceToI(s[start:start+W])#convert the subsequence to an indicator matrix
-            step = 0.2*pow(n+1,-0.6)#the online step size. For OLO6a
+            step = 0.01*pow(n+1,-0.6)#the online step size. For OLO6a
             #step = 0.025*pow(n+1,-0.6)#the online step size. For OLO6a
             #step = 1.0/10000
             #E-step
@@ -280,8 +281,8 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
             backgrounds_sum = backgrounds_sum + theta_background_matrix
             """
             fractions.append(lambda_motif)
-            pwms.append(theta_motif)
-            backgrounds.append(theta_background)
+            #pwms.append(theta_motif)
+            #backgrounds.append(theta_background)
             #if n > nstart, then start using averaged parameters for the upcoming E-step
             #have to repeat the normalization to ensure probability is properly conserved
             if n > nstart:
@@ -301,7 +302,7 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
                 """
             #update the counter
             n = n + 1
-            print n
+            #print n
             #the expected log likelihood, the objective function, based on current parameters
             #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
     print s1_2
@@ -327,6 +328,9 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     return lambda_motif, theta_motif, theta_background_matrix, k
     """
 
+def f(x,y):
+    return y[y.keys()[x]]
+
 """
 The main online MEME algorithm.
 
@@ -340,7 +344,10 @@ That is, Y = X.
 """
 def meme(Y,W,NPASSES):
     #6/28/13, check with initial conditions matching solution
-    lambda_motif = 0.00625
+    #p = Pool(64)
+    #s=p.map(functools.partial(f,y=Y),range(64))
+    #print s
+    lambda_motif = 0.000625
     theta_motif = load('NRSF_test.npy')
     theta_uniform_background = array([[0.25, 0.25, 0.25, 0.25]])
     theta_uniform_background_matrix = theta_uniform_background.repeat(W,axis=0)#the initial guess for background is uniform distribution
@@ -356,8 +363,6 @@ theta_motif - a numpy array, the PWM
 theta_background_matrix - a numpy array, the background model
 """
 def outputMotif(lambda_motif, theta_motif, theta_background_matrix):
-    print 'hello'
-    print theta_motif
     data = LogoData.from_counts(counts=theta_motif,alphabet=unambiguous_dna_alphabet)
     options = LogoOptions()
     options.title = 'Motif'

@@ -6,6 +6,15 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+7/16/13:
+Tried online MEME on the Myers data. Only looked at rep 1 peaks that overlapped with rep 2 peaks for the K562 NRSF dataset. For the top
+600 peaks, without any trimming, Online MEME usually converges to the correct motif. If gamma_0 is too high, it will converge to 
+repetitive elements or converge to "pitfalls". If gamma_0, it will not converge fast enough and the pwm will not be very "crisp".
+This is even more of a problem when I included every single overlapping peak. For top 600, gamma_0 of 0.02 works fine. It has
+about 500,000 subsequences. For the entire overlapping dataset, gamma_0 of 0.01 works okay, but clearly does not converge fast
+enough. If gamma_0 gets too big, it will converge to a repetitive motif. I could fix this by either implemening the smoothing 
+feature or running through the dataset multiple times. 
+
 7/15/13:
 MEME-chip sucks. Downloaded K562 NRSF (1st replicate) broadpeaks file from Myers lab ENCODE as a real world dataset. gamma_0=0.2
 seems to be the sweet spot. Used a simulated dataset of NRSF, mean length 100, 80% of sequences contain motif, 1000 sequences.
