@@ -16,6 +16,7 @@ from itertools import repeat, chain, izip
 from pygr import seqdb
 from bisect import bisect_left
 import functools
+import time
 
 """
 Equation 14 from the Bailey and Elkan paper. Calculates P(X|theta_motif). That is,
@@ -245,18 +246,30 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     keys = Y.keys()
     shuffle(keys)
     #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
+    p = Pool(20)
     for y in keys:#iterate through each key in the FASTA file
         s = str(Y[y])#grab the whole sequence as a string
         L = len(s)#length of sequence
         starts = range(0,L-W+1)
-        shuffle(starts)
+        Is = [sequenceToI(s[k:k+W]) for k in starts]#indicator matrices of all subsequences in sequence s
+        shuffle(starts)#shuffle the starts for randomness
         for start in starts:
-            I = sequenceToI(s[start:start+W])#convert the subsequence to an indicator matrix
-            step = 0.01*pow(n+1,-0.6)#the online step size. For OLO6a
+            I = Is[start]
+            step = 0.05*pow(n+1,-0.6)#the online step size. For OLO6a
             #step = 0.025*pow(n+1,-0.6)#the online step size. For OLO6a
             #step = 1.0/10000
             #E-step
-            ds1_1 = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif)
+            #smooth
+            left = max(0,start-W+1)
+            right = min(L-W+1,start+W)
+            middle = start - left
+            #find expected Z values for all W-mers overlapping the current W-mer
+            Z = [Z0_I(Is[k],theta_motif, theta_background_matrix,lambda_motif) for k in range(left,right)]
+            #find the Zs with parallel mapping
+            #Z = p.map(functools.partial(Z0_I, theta_motif=theta_motif, theta_background_matrix=theta_background_matrix,lambda_motif=lambda_motif),Is[left:right])
+            smooth(Z,W)#smooth the Z values
+            #ds1_1 = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif)
+            ds1_1 = Z[middle]
             #print y
             ds1_2 = ds1_1*I
             ds2_2 = (1-ds1_1)*I
@@ -328,8 +341,24 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     return lambda_motif, theta_motif, theta_background_matrix, k
     """
 
-def f(x,y):
-    return y[y.keys()[x]]
+"""
+The smooth algorithm from Bailey and Elkan 1993. Constrains the sum of expectations in any window of width W to sum no
+more than 1.
+
+Input:
+Z - a list of expected values. Its length is L - W + 1, where L is the length of the original sequence
+W - the width of the motif
+
+Output:
+Z - the list of expected values normalized so that sums in any window of width W sum to 1 or less 
+"""
+def smooth(Z,W):
+    for offset in range(W):
+        for j in range(offset, len(Z) - W + 1, W):
+            local = Z[j:j+W]
+            localp = sum(local)
+            if localp > 1:
+                Z[j:j+W] = [l/localp for l in local]
 
 """
 The main online MEME algorithm.
@@ -389,8 +418,12 @@ if __name__ == "__main__":
     w = int(options.width)
     nmotifs = int(options.nummotifs)
     if len(args) == 1:#the program is correctly used, so do MEME
+        print "Started at:"
+        print time.ctime()
         sp = seqdb.SequenceFileDB(args[0])
         meme(sp,w,nmotifs)
         sp.close()
+        print "Ended at:"
+        print time.ctime()
     else:
         parser.print_help()
