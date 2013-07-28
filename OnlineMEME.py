@@ -7,16 +7,16 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from multiprocessing import Pool
-from random import gauss, sample, shuffle
 from numpy import mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, ones, concatenate
 from numpy.random import rand
 from pylab import imread, imshow, plot, show
 from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, unambiguous_dna_alphabet
 from itertools import repeat, chain, izip
-from pygr import seqdb
 from bisect import bisect_left
 import functools
 import time
+from dreme import *
+from random import shuffle
 
 """
 Equation 14 from the Bailey and Elkan paper. Calculates P(X|theta_motif). That is,
@@ -209,7 +209,7 @@ def overlap_occurrences(X, W):
 The EM algorithm. 
 
 Input:
-Y, pygr database. dataset of sequences (As of 6/28/13, assume each sequence contains 1 subsequence
+Y, list of strings. dataset of sequences 
 theta_motif, motif PWM matrix guess
 theta_background_matrix, background PWM matrix guess
 lambda_motif, motif frequency guess
@@ -229,7 +229,7 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     s2_2 = theta_background_matrix#the matrix holding the expected number of times a letter appears in each position, background
     n = 0#the counter
     nstart = 100000000#when to start averaging
-    N = len(Y)#number of observations
+    N = len(Y)#number of sequences
     #reserve some memory. this was when each sequence had only one subsequence
     """fractions = zeros(N)
     pwms = zeros((N,W,4))
@@ -237,18 +237,20 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     """
     #prepare lists because we don't know how many subsequences we have in total
     fractions = list()
+    distances = list()
     pwms = list()
     backgrounds = list()
     expectations = list()
     fractions_sum = 0#should be deleted
     pwms_sum = zeros((W,4))#should be deleted
     backgrounds_sum = zeros((W,4))#should be deleted
-    keys = Y.keys()
-    shuffle(keys)
+    seqinds = range(N)
+    shuffle(seqinds)
     #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
     p = Pool(20)
-    for y in keys:#iterate through each key in the FASTA file
-        s = str(Y[y])#grab the whole sequence as a string
+    truemotif = load('NRSF_Motif.npy')
+    for seqind in seqinds:#iterate through each key in the FASTA file
+        s = Y[seqind]#grab the whole sequence as a string
         L = len(s)#length of sequence
         starts = range(0,L-W+1)
         Is = [sequenceToI(s[k:k+W]) for k in starts]#indicator matrices of all subsequences in sequence s
@@ -294,6 +296,7 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
             backgrounds_sum = backgrounds_sum + theta_background_matrix
             """
             fractions.append(lambda_motif)
+            distances.append(dist(theta_motif,truemotif))
             #pwms.append(theta_motif)
             #backgrounds.append(theta_background)
             #if n > nstart, then start using averaged parameters for the upcoming E-step
@@ -321,7 +324,8 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     print s1_2
     #x = load('NRF1_Motif.npy')
     #pylab.plot([dist(x,y) for y in pwms])
-    plot(fractions)
+    #plot(fractions)
+    plot(distances)
     show()
     #save('the_expectations', expectations)
     return theta_motif, theta_background_matrix, lambda_motif
@@ -364,7 +368,7 @@ def smooth(Z,W):
 The main online MEME algorithm.
 
 Input:
-Y, pygr database. dataset of sequences
+Y, list of strings. dataset of sequences
 W, width of motifs to search for
 NPASSES, number of distinct motifs to search for
 
@@ -378,7 +382,9 @@ def meme(Y,W,NPASSES):
     #print s
     lambda_motif = 0.000625
     theta_motif = load('NRSF_test.npy')
-    theta_uniform_background = array([[0.25, 0.25, 0.25, 0.25]])
+    _dna_alphabet = 'ACGT'
+    dprobs = get_probs(Y, _dna_alphabet)
+    theta_uniform_background = array([[dprobs['A'], dprobs['C'], dprobs['G'], dprobs['T']]])
     theta_uniform_background_matrix = theta_uniform_background.repeat(W,axis=0)#the initial guess for background is uniform distribution
     theta_motif, theta_background_matrix, lambda_motif = Online_EM(Y, theta_motif, theta_uniform_background_matrix, lambda_motif)
     outputMotif(lambda_motif, theta_motif, theta_background_matrix)
@@ -407,7 +413,10 @@ def outputMotif(lambda_motif, theta_motif, theta_background_matrix):
     print theta_motif
     print theta_background_matrix
 
-if __name__ == "__main__":
+"""
+The main executable function
+"""
+def main():
     usage = "usage: %prog [options] <input FASTA>"
     description = "The program applies the Online MEME algorithm to find motifs in a FASTA file"
     parser = OptionParser(usage=usage,description=description)
@@ -420,10 +429,12 @@ if __name__ == "__main__":
     if len(args) == 1:#the program is correctly used, so do MEME
         print "Started at:"
         print time.ctime()
-        sp = seqdb.SequenceFileDB(args[0])
-        meme(sp,w,nmotifs)
-        sp.close()
+        seqs = sequence.convert_ambigs(sequence.readFASTA(args[0], None, True))
+        meme(seqs,w,nmotifs)
         print "Ended at:"
         print time.ctime()
     else:
         parser.print_help()
+
+if __name__=='__main__':
+    main()

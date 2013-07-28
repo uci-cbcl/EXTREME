@@ -6,6 +6,48 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+7/27/13:
+Extended the NRSF test by 10 base pairs on the left side. As expected, the PWM was still captured by the right side of the extended
+PWM. Implemented DREME's method of storing sequences and getting nucleotide frequencies, no longer need pygr. Plotted distances.
+For some reason, I captured a different motif from the sorted top 600 set. This motif had a higher fraction than the canonical
+motif. Maybe because I used a more accurate background model. Stored in distances pngs. Idea for combining with DREME:
+In each step, DREME finds a core, seed from instances of core using batch MEME's heuristic, use the DREME occurrences for the motif
+fraction guess, Online MEME searches for maximum size motif, shrinks down or searches again for smaller
+motifs, and then erase motif occurrences using Bayesian decision theory. Repeat this step until desired number of motifs
+found or E-value threshold reached. 
+
+7/26/13:
+Hold off from speeding up DREME for now. Just focus on doing seed heuristic for now, because if seed heuristic doesn't work
+then I just wasted my time. Extend the NRSF guess next time and see if that affects the middle still.
+
+7/18/13:
+Ran it on the intersected dataset with gamma_0 = 0.05. ~5,000,000 subsequences. Takes over an hour to complete. Got the correct
+motif. I got this for the expected counts (I should do some math to figure out the best empirical gamma_0):
+
+[[  3.66816003e-05   1.94069486e-05   5.85885736e-05   7.33175254e-05]
+ [  1.73989938e-05   3.01240380e-05   2.62699048e-05   1.13888180e-04]
+ [  1.88402226e-05   1.54034106e-04   1.21425579e-06   1.32706076e-05]
+ [  1.68591485e-04   1.61766759e-10   1.74214575e-05   3.80694610e-06]
+ [  2.28723451e-06   3.18960952e-06   1.76878963e-04   6.95718785e-06]
+ [  8.95199351e-06   1.06088978e-04   5.63539555e-05   1.74481147e-05]
+ [  1.88514567e-04   5.16481097e-17   3.19589787e-11   5.33415840e-14]
+ [  9.03307774e-20   1.87958160e-04   5.32343674e-10   3.31747027e-18]
+ [  1.86073636e-06   1.72447466e-04   8.24296119e-11   1.47330816e-05]
+ [  8.45917941e-05   2.54954558e-05   2.61629141e-05   5.43548999e-05]
+ [  3.50229811e-05   3.58553275e-05   2.09632097e-05   9.87766311e-05]
+ [  8.26785637e-06   1.62108699e-23   1.82425288e-04   2.39415533e-21]
+ [  3.91008458e-06   5.53666696e-13   1.86857366e-04   3.40091724e-21]
+ [  1.54144648e-04   1.23110746e-05   1.89139208e-05   6.05309627e-06]
+ [  1.36011811e-06   1.47828978e-04   3.84186626e-05   3.92587252e-06]
+ [  1.92103503e-04   4.48274791e-16   2.67576344e-22   4.01529805e-20]
+ [  1.99930234e-06   3.40984542e-07   1.89538657e-04   3.80471032e-18]
+ [  2.79240466e-05   1.17481922e-04   2.53292311e-05   2.13611953e-05]
+ [  4.63760590e-05   8.58640325e-06   8.34644507e-05   5.39810773e-05]
+ [  2.79646290e-05   1.03917789e-04   3.56657171e-05   2.51252625e-05]
+ [  2.60511430e-05   1.16332327e-04   1.04380186e-05   4.00787910e-05]]
+
+lambda = 0.000242620408426
+
 7/17/13:
 Implemented smoothing for Online. It calculates the expected Z value for all overlapping W-mers and then performs the smoothing
 algorithm on this subsequence. Tested this new feature on the top 600 NRSF K562 set and was able to achieve the correct motif even
