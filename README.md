@@ -6,6 +6,10 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/1/13:
+Added a DREME seeder. It took a few tries, but at a motif width of 20 managed to capture
+the correct motif. Must find a way to terminate the program early in case of failed run.
+
 7/27/13:
 Extended the NRSF test by 10 base pairs on the left side. As expected, the PWM was still captured by the right side of the extended
 PWM. Implemented DREME's method of storing sequences and getting nucleotide frequencies, no longer need pygr. Plotted distances.
