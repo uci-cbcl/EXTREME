@@ -242,10 +242,8 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
     p = Pool(20)
     truemotif = load('NRSF_Motif.npy')
-    l = 0
+    print "Running Online EM algorithm..."
     for seqind in seqinds:#iterate through each key in the FASTA file
-        l = l + 1
-        print l
         s = Y[seqind]#grab the whole sequence as a string
         L = len(s)#length of sequence
         starts = range(0,L-W+1)
@@ -317,14 +315,14 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
             #print n
             #the expected log likelihood, the objective function, based on current parameters
             #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
-    print s1_2
+    #print s1_2
     #x = load('NRF1_Motif.npy')
     #pylab.plot([dist(x,y) for y in pwms])
-    plot(fractions)
+    #plot(fractions)
     #plot(distances)
-    show()
+    #show()
     #save('the_expectations', expectations)
-    return theta_motif, theta_background_matrix, lambda_motif
+    return theta_motif, theta_background_matrix, lambda_motif, fractions
     #E-step, this may be superfluous
     #Z, c0, c = E(I, theta_motif, theta_background_matrix, lambda_motif)
     #M-step, this may be superfluous
@@ -472,20 +470,19 @@ def find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs, ng
     #
     # Print the best word
     #
-    (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
+    (best_word, pos, neg, best_pvalue, best_Evalue, unerased_log_Evalue) = \
             get_best_re(re_pvalues, pos_seqs, unerased_pos_seqs, unerased_neg_seqs, minw, maxw, 
                 ethresh, log_add_pthresh, given_only)
-    """
-    if _verbosity >= NORMAL_VERBOSE:
-        pv_string = sprint_logx(best_pvalue, 1, _pv_format)
-        ev_string = sprint_logx(best_Evalue, 1, _pv_format)
-        unerased_ev_string = sprint_logx(unerased_log_Evalue, 1, _pv_format)
-        print(("Best RE was {0:s} {1:s} p-value= {2:s} E-value= {3:s} "
+    _pv_format = "%3.1fe%+04.0f"
+    rc_best_word = get_rc(best_word)
+    pv_string = sprint_logx(best_pvalue, 1, _pv_format)
+    ev_string = sprint_logx(best_Evalue, 1, _pv_format)
+    unerased_ev_string = sprint_logx(unerased_log_Evalue, 1, _pv_format)
+    print(("Best RE was {0:s} {1:s} p-value= {2:s} E-value= {3:s} "
                "Unerased_E-value= {4:s}").format(best_word, rc_best_word, 
                         pv_string, ev_string, unerased_ev_string))
-    """
 
-    return (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue)
+    return (best_word, pos, neg, best_pvalue, best_Evalue, unerased_log_Evalue)
 
 """
 Equation 47. Used for evaluation in the bisection method to find the roots of
@@ -591,8 +588,8 @@ Y, list of strings. dataset of sequences
 W, width of motifs to search for
 NPASSES, number of distinct motifs to search for
 
-Assume that each sequence is the size of the motif for now.
-That is, Y = X.
+Output:
+fractions
 """
 def meme(Y,W,NPASSES):
     #6/28/13, check with initial conditions matching solution
@@ -609,6 +606,10 @@ def meme(Y,W,NPASSES):
     dprobs = get_probs(neg_seqs, _dna_alphabet)
     #generate first order Markov background based on nucleotide frequencies
     theta_background = array([[dprobs['A'], dprobs['C'], dprobs['G'], dprobs['T']]])
+    lambda_motifs = list()
+    theta_motifs = list()
+    theta_background_matrices = list()
+    fractionses = list()
     for npass in range(NPASSES):
         #Use DREME to find a core seed
         (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
@@ -619,32 +620,47 @@ def meme(Y,W,NPASSES):
         theta_motif = generate_starting_point(best_word, pos_seqs, W)
         #theta_motif = load('NRSF_test.npy')
         theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
-        theta_motif, theta_background_matrix, lambda_motif = Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif)
-        outputMotif(lambda_motif, theta_motif, theta_background_matrix)
+        theta_motif, theta_background_matrix, lambda_motif, fractions = Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif)
+        lambda_motifs.append(lambda_motif)
+        theta_motifs.append(theta_motif)
+        theta_background_matrices.append(theta_background_matrix)
+        fractionses.append(fractions)
+    return lambda_motifs, theta_motifs, theta_background_matrices, fractionses
     
 """
-Outputs the motif as a web logo.
+Outputs the motif as a web logo. Saves fractions as .npy.
 
 Input:
 lambda_motif - a double, fraction of subsequences 
 theta_motif - a numpy array, the PWM
 theta_background_matrix - a numpy array, the background model
+fractions - list of fractions at each step
+k - the motif number index
+outstr - the prefix for the output files
 """
-def outputMotif(lambda_motif, theta_motif, theta_background_matrix):
+def outputMotif(lambda_motif, theta_motif, theta_background_matrix, fractions, k, outstr):
+    _pv_format = "%3.1fe%+04.0f"
+    f_string = sprint_logx(log(lambda_motif), 1, _pv_format)
+    print(("Motif {0:s} had a fraction of {1:s}").format(str(k), f_string))
+    print 'Saving motif as a png...'
     data = LogoData.from_counts(counts=theta_motif,alphabet=unambiguous_dna_alphabet)
     options = LogoOptions()
     options.title = 'Motif'
     forma = LogoFormat(data, options)
-    fout = open('results.png', 'w')
+    fout = open(outstr + "_" + str(k) + '.png', 'w')
     png_formatter(data, forma, fout)
     fout.close()
-    img = imread('results.png')
-    imshow(img)
-    show()
+    print 'Saving fractions list'
+    save(outstr + "_" + str(k), fractions)
+    #img = imread('results.png')
+    #imshow(img)
+    #show()
     #for now, just print, but will have to output a png later
-    print lambda_motif
-    print theta_motif
-    print theta_background_matrix
+    #print lambda_motif
+    #print theta_motif
+    #print theta_background_matrix
+    
+    
 
 """
 The main executable function
@@ -659,6 +675,7 @@ def main():
     parser.add_argument("-minw", dest="minwidth", help="Minimum width of the motif to search for", type=int, default=8)
     parser.add_argument("-maxw", dest="maxwidth", help="Maximum width of the motif to search for", type=int, default=40)
     parser.add_argument("-m", "--nummotifs", dest="nummotifs", help="Number of motifs to search for", type=int, default=1)
+    parser.add_argument("-o", "--output", dest="output", help="Prefix for all output files", default="output")    
     args = parser.parse_args()
     w = args.width
     if w == 0:
@@ -672,7 +689,10 @@ def main():
     print time.ctime()
     #Use DREME's SeqIO to read in FASTA to list
     seqs = sequence.convert_ambigs(sequence.readFASTA(args.fastafile, None, True))
-    meme(seqs,w,nmotifs)
+    lambda_motifs, theta_motifs, theta_background_matrices, fractionses = meme(seqs,w,nmotifs)
+    k = 1
+    for lambda_motif, theta_motif, theta_background_matrix, fractions in zip(lambda_motifs, theta_motifs, theta_background_matrices, fractionses):
+        outputMotif(lambda_motif, theta_motif, theta_background_matrix, fractions, k, args.output)
     print "Ended at:"
     print time.ctime()
 

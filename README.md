@@ -6,6 +6,9 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/2/13:
+Removed plotting and added print statements so that I can run nohup.
+
 8/1/13:
 Added a DREME seeder. It took a few tries, but at a motif width of 20 managed to capture
 the correct motif. Must find a way to terminate the program early in case of failed run.
