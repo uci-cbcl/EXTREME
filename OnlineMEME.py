@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 from argparse import ArgumentParser
 from multiprocessing import Pool
 from numpy import mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, ones, concatenate
@@ -202,7 +203,8 @@ def overlap_occurrences(X, W):
 The EM algorithm. 
 
 Input:
-Y, list of strings. dataset of sequences 
+Y, list of strings. dataset of sequences
+numsubs, number of subsequences
 theta_motif, motif PWM matrix guess
 theta_background_matrix, background PWM matrix guess
 lambda_motif, motif frequency guess
@@ -212,7 +214,7 @@ theta_motif, motif PWM matrix
 theta_background_matrix, background PWM matrix
 lambda_motif, motif frequency
 """
-def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
+def Online_EM(Y, numsubs, theta_motif, theta_background_matrix, lambda_motif):
     W = theta_motif.shape[0]#get the length of the motif
     #X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
     #subsequences are grouped by sequences for normalization purposes
@@ -229,8 +231,8 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     backgrounds = zeros((N,4))
     """
     #prepare lists because we don't know how many subsequences we have in total
-    fractions = list()
-    distances = list()
+    fractions = [None]*numsubs#pre-allocate space
+    distances = [None]*numsubs#pre-allocate space
     pwms = list()
     backgrounds = list()
     expectations = list()
@@ -240,8 +242,8 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     seqinds = range(N)
     random.shuffle(seqinds)
     #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
-    p = Pool(20)
-    truemotif = load('NRSF_Motif.npy')
+    #p = Pool(20)
+    truemotif = load('PWM_29_correct.npy')
     print "Running Online EM algorithm..."
     for seqind in seqinds:#iterate through each key in the FASTA file
         s = Y[seqind]#grab the whole sequence as a string
@@ -289,8 +291,8 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
             pwms_sum = pwms_sum + theta_motif
             backgrounds_sum = backgrounds_sum + theta_background_matrix
             """
-            fractions.append(lambda_motif)
-            #distances.append(dist(theta_motif,truemotif))
+            fractions[n] = lambda_motif
+            distances[n] = dist(theta_motif,truemotif)
             #pwms.append(theta_motif)
             #backgrounds.append(theta_background)
             #if n > nstart, then start using averaged parameters for the upcoming E-step
@@ -322,7 +324,7 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     #plot(distances)
     #show()
     #save('the_expectations', expectations)
-    return theta_motif, theta_background_matrix, lambda_motif, fractions
+    return theta_motif, theta_background_matrix, lambda_motif, fractions, distances
     #E-step, this may be superfluous
     #Z, c0, c = E(I, theta_motif, theta_background_matrix, lambda_motif)
     #M-step, this may be superfluous
@@ -562,7 +564,7 @@ theta_motif - numpy array, the pwm generated from a subsequence containing the c
 """
 def generate_starting_point(core_re, pos_seqs, W, given_only=False):
     ms = make_dna_re(core_re, given_only)#make a regular expression for both strands
-    m = bisection(0.3,0.25,1)
+    m = bisection(0.4,0.25,1)
     #search through each sequence until find a match far enough from the edges
     #search randomly
     inds = range(len(pos_seqs))
@@ -610,6 +612,7 @@ def meme(Y,W,NPASSES):
     theta_motifs = list()
     theta_background_matrices = list()
     fractionses = list()
+    distanceses = list()
     for npass in range(NPASSES):
         #Use DREME to find a core seed
         (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
@@ -617,15 +620,17 @@ def meme(Y,W,NPASSES):
         #From DREME's best re, predict the fraction 
         lambda_motif = 1.0*pos/n/2#dividing by 2 accounts for the fact that RC not accounted for
         #From the best RE, search the positive sequence set and generate a starting PWM
+        print 'Generating starting points from subsequences'
         theta_motif = generate_starting_point(best_word, pos_seqs, W)
         #theta_motif = load('NRSF_test.npy')
         theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
-        theta_motif, theta_background_matrix, lambda_motif, fractions = Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif)
+        theta_motif, theta_background_matrix, lambda_motif, fractions, distances = Online_EM(Y, n, theta_motif, theta_background_matrix, lambda_motif)
         lambda_motifs.append(lambda_motif)
         theta_motifs.append(theta_motif)
         theta_background_matrices.append(theta_background_matrix)
         fractionses.append(fractions)
-    return lambda_motifs, theta_motifs, theta_background_matrices, fractionses
+        distanceses.append(distances)
+    return lambda_motifs, theta_motifs, theta_background_matrices, fractionses, distanceses
     
 """
 Outputs the motif as a web logo. Saves fractions as .npy.
@@ -638,7 +643,7 @@ fractions - list of fractions at each step
 k - the motif number index
 outstr - the prefix for the output files
 """
-def outputMotif(lambda_motif, theta_motif, theta_background_matrix, fractions, k, outstr):
+def outputMotif(lambda_motif, theta_motif, theta_background_matrix, fractions, distances, k, outstr):
     _pv_format = "%3.1fe%+04.0f"
     f_string = sprint_logx(log(lambda_motif), 1, _pv_format)
     print(("Motif {0:s} had a fraction of {1:s}").format(str(k), f_string))
@@ -647,11 +652,15 @@ def outputMotif(lambda_motif, theta_motif, theta_background_matrix, fractions, k
     options = LogoOptions()
     options.title = 'Motif'
     forma = LogoFormat(data, options)
-    fout = open(outstr + "_" + str(k) + '.png', 'w')
+    fout = open(outstr + "Motif_" + str(k) + '.png', 'w')
     png_formatter(data, forma, fout)
     fout.close()
     print 'Saving fractions list'
-    save(outstr + "_" + str(k), fractions)
+    save(outstr + "Fractions_" + str(k), fractions)
+    print 'Saving distances list'
+    save(outstr + "Distances_" + str(k), distances)
+    print 'Saving PWM'
+    save(outstr + "PWM_" + str(k), theta_motif)
     #img = imread('results.png')
     #imshow(img)
     #show()
@@ -675,7 +684,7 @@ def main():
     parser.add_argument("-minw", dest="minwidth", help="Minimum width of the motif to search for", type=int, default=8)
     parser.add_argument("-maxw", dest="maxwidth", help="Maximum width of the motif to search for", type=int, default=40)
     parser.add_argument("-m", "--nummotifs", dest="nummotifs", help="Number of motifs to search for", type=int, default=1)
-    parser.add_argument("-o", "--output", dest="output", help="Prefix for all output files", default="output")    
+    parser.add_argument("-o", "--output", dest="output", help="Folder for all output files", default="output")    
     args = parser.parse_args()
     w = args.width
     if w == 0:
@@ -685,14 +694,27 @@ def main():
         minw = w
         maxw = w
     nmotifs = args.nummotifs
+    # make the directory (recursively)
+    outdir = args.output
+    outpre = outdir + "/"
+    clobber = True
+    try:
+        os.makedirs(outdir)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST:
+            if not clobber:
+                print >> sys.stderr, ("output directory (%s) already exists "
+                "but DREME was not told to clobber it") % (outdir); sys.exit(1)
+        else: raise
     print "Started at:"
     print time.ctime()
     #Use DREME's SeqIO to read in FASTA to list
     seqs = sequence.convert_ambigs(sequence.readFASTA(args.fastafile, None, True))
-    lambda_motifs, theta_motifs, theta_background_matrices, fractionses = meme(seqs,w,nmotifs)
+    lambda_motifs, theta_motifs, theta_background_matrices, fractionses, distanceses = meme(seqs,w,nmotifs)
     k = 1
-    for lambda_motif, theta_motif, theta_background_matrix, fractions in zip(lambda_motifs, theta_motifs, theta_background_matrices, fractionses):
-        outputMotif(lambda_motif, theta_motif, theta_background_matrix, fractions, k, args.output)
+    for lambda_motif, theta_motif, theta_background_matrix, fractions, distances in zip(lambda_motifs, theta_motifs, theta_background_matrices, fractionses, distanceses):
+        outputMotif(lambda_motif, theta_motif, theta_background_matrix, fractions, distances, k, outpre)
+        k = k+1
     print "Ended at:"
     print time.ctime()
 

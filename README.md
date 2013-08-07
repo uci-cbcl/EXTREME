@@ -6,6 +6,13 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/6/13:
+Added multiple outputs to a folder option. Save distances to a PWM for plotting later.
+On the GM12878 set, it succeeds 6/10 times. It seems to first dip and then rise. 
+The reason for failures may be that the algorithm has not seen enough instances
+of the motif and so the fraction just keeps dipping until it hits a point of no
+return.
+
 8/2/13:
 Removed plotting and added print statements so that I can run nohup.
 
