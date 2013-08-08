@@ -239,81 +239,86 @@ def Online_EM(Y, numsubs, theta_motif, theta_background_matrix, lambda_motif):
     fractions_sum = 0#should be deleted
     pwms_sum = zeros((W,4))#should be deleted
     backgrounds_sum = zeros((W,4))#should be deleted
-    seqinds = range(N)
-    random.shuffle(seqinds)
+    seqindpairs = [[(seqind,subseqind) for subseqind in range(len(Y[seqind]) - W)] for seqind in range(N)]
+    seqindpairs = list(chain(*seqindpairs))
+    random.shuffle(seqindpairs)
     #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
     #p = Pool(20)
     truemotif = load('PWM_29_correct.npy')
     print "Running Online EM algorithm..."
-    for seqind in seqinds:#iterate through each key in the FASTA file
+    for seqindpair in seqindpairs:#iterate through each sequence index and start pair
+        seqind = seqindpair[0]
+        start = seqindpair[1]
         s = Y[seqind]#grab the whole sequence as a string
         L = len(s)#length of sequence
-        starts = range(0,L-W+1)
-        Is = [sequenceToI(s[k:k+W]) for k in starts]#indicator matrices of all subsequences in sequence s
-        random.shuffle(starts)#shuffle the starts for randomness
-        for start in starts:
-            I = Is[start]
-            step = 0.05*pow(n+1,-0.6)#the online step size. For OLO6a
+        #starts = range(0,L-W+1)
+        #Is = [sequenceToI(s[k:k+W]) for k in starts]#indicator matrices of all subsequences in sequence s
+        #random.shuffle(starts)#shuffle the starts for randomness
+        #for start in starts:
+            #I = Is[start]
+        step = 0.05*pow(n+1,-0.6)#the online step size. For OLO6a
             #step = 0.025*pow(n+1,-0.6)#the online step size. For OLO6a
             #step = 1.0/10000
             #E-step
             #smooth
-            left = max(0,start-W+1)
-            right = min(L-W+1,start+W)
-            middle = start - left
+        left = max(0,start-W+1)
+        right = min(L-W+1,start+W)
+        middle = start - left
+        Is = [sequenceToI(s[k:k+W]) for k in range(left,right)]
             #find expected Z values for all W-mers overlapping the current W-mer
-            Z = [Z0_I(Is[k],theta_motif, theta_background_matrix,lambda_motif) for k in range(left,right)]
+        Z = [Z0_I(I,theta_motif, theta_background_matrix,lambda_motif) for I in Is]
             #find the Zs with parallel mapping
             #Z = p.map(functools.partial(Z0_I, theta_motif=theta_motif, theta_background_matrix=theta_background_matrix,lambda_motif=lambda_motif),Is[left:right])
-            smooth(Z,W)#smooth the Z values
+        smooth(Z,W)#smooth the Z values
             #ds1_1 = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif)
-            ds1_1 = Z[middle]
+        ds1_1 = Z[middle]
             #print y
-            ds1_2 = ds1_1*I
-            ds2_2 = (1-ds1_1)*I
-            s1_1 = s1_1 + step*(ds1_1 - s1_1)
-            s1_2 = s1_2 + step*(ds1_2 - s1_2)
+        I = Is[middle]
+        ds1_2 = ds1_1*I
+        ds2_2 = (1-ds1_1)*I
+        s1_1 = s1_1 + step*(ds1_1 - s1_1)
+        s1_2 = s1_2 + step*(ds1_2 - s1_2)
             #print s1_2
-            s2_2 = s2_2 + step*(ds2_2 - s2_2)
+        s2_2 = s2_2 + step*(ds2_2 - s2_2)
             #M-step
-            lambda_motif = s1_1
-            theta_motif = s1_2
-            theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
-            theta_background = s2_2.sum(axis = 0)#collapse the expected background counts into a single array
-            theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
-            theta_background = array([theta_background])#prepare background for repeat
-            theta_background_matrix = theta_background.repeat(W,axis=0)
+        lambda_motif = s1_1
+        theta_motif = s1_2
+        theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
+        theta_background = s2_2.sum(axis = 0)#collapse the expected background counts into a single array
+        theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
+        theta_background = array([theta_background])#prepare background for repeat
+        theta_background_matrix = theta_background.repeat(W,axis=0)
             #save current parameters
-            """fractions[n] = lambda_motif
+        """fractions[n] = lambda_motif
             pwms[n] = theta_motif
             backgrounds[n] = theta_background
             fractions_sum = fractions_sum + lambda_motif
             pwms_sum = pwms_sum + theta_motif
             backgrounds_sum = backgrounds_sum + theta_background_matrix
-            """
-            fractions[n] = lambda_motif
-            distances[n] = dist(theta_motif,truemotif)
+        """
+        fractions[n] = lambda_motif
+        distances[n] = dist(theta_motif,truemotif)
             #pwms.append(theta_motif)
             #backgrounds.append(theta_background)
             #if n > nstart, then start using averaged parameters for the upcoming E-step
             #have to repeat the normalization to ensure probability is properly conserved
-            if n > nstart:
-                lambda_motif = mean(fractions[n/2:n],axis=0)#new fraction is mean of previous fractions
-                theta_motif = mean(pwms[n/2:n],axis=0)#new pwm is mean of previous pwms
-                theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
-                theta_background = mean(backgrounds[n/2:n],axis=0)#new background is mean of previous backgrounds
-                theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
+        if n > nstart:
+            lambda_motif = mean(fractions[n/2:n],axis=0)#new fraction is mean of previous fractions
+            theta_motif = mean(pwms[n/2:n],axis=0)#new pwm is mean of previous pwms
+            theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
+            theta_background = mean(backgrounds[n/2:n],axis=0)#new background is mean of previous backgrounds
+            theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
                 #theta_background = array([theta_background])#prepare background for repeat
-                theta_background_matrix = theta_background.repeat(W,axis=0)
-                """
+            theta_background_matrix = theta_background.repeat(W,axis=0)
+            """
                 lambda_motif = fractions_sum/(n+1)
                 theta_motif = pwms_sum/(n+1)
                 theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
                 theta_background_matrix = backgrounds_sum/(n+1)
                 theta_background_matrix = theta_background_matrix/theta_background_matrix.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
-                """
+            """
             #update the counter
-            n = n + 1
+        n = n + 1
             #print n
             #the expected log likelihood, the objective function, based on current parameters
             #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess

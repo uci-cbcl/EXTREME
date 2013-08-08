@@ -6,6 +6,10 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/7/13:
+Shuffling subsequences instead of sequences now. Need to optimize it later. For now,
+run multiple times and see how well it works.
+
 8/6/13:
 Added multiple outputs to a folder option. Save distances to a PWM for plotting later.
 On the GM12878 set, it succeeds 6/10 times. It seems to first dip and then rise. 
