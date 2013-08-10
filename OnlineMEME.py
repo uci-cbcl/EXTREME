@@ -214,7 +214,7 @@ theta_motif, motif PWM matrix
 theta_background_matrix, background PWM matrix
 lambda_motif, motif frequency
 """
-def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
+def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif, smoothing=False):
     W = theta_motif.shape[0]#get the length of the motif
     X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
     #subsequences are grouped by sequences for normalization purposes
@@ -263,19 +263,22 @@ def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
             #step = 1.0/10000
             #E-step
             #smooth
-        left = max(0,start-W+1)
-        right = min(L-W+1,start+W)
-        middle = start - left
-        Iss = Is[seqind][left:right]
+        if smoothing:
+            left = max(0,start-W+1)
+            right = min(L-W+1,start+W)
+            middle = start - left
+            Iss = Is[seqind][left:right]
             #find expected Z values for all W-mers overlapping the current W-mer
-        Z = [Z0_I(I,theta_motif, theta_background_matrix,lambda_motif) for I in Iss]
+            Z = [Z0_I(I,theta_motif, theta_background_matrix,lambda_motif) for I in Iss]
             #find the Zs with parallel mapping
             #Z = p.map(functools.partial(Z0_I, theta_motif=theta_motif, theta_background_matrix=theta_background_matrix,lambda_motif=lambda_motif),Is[left:right])
-        smooth(Z,W)#smooth the Z values
-            #ds1_1 = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif)
-        ds1_1 = Z[middle]
+            smooth(Z,W)#smooth the Z values
+            ds1_1 = Z[middle]
             #print y
-        I = Iss[middle]
+            I = Iss[middle]
+        else:
+            I = Is[seqind][start]
+            ds1_1 = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif)#perhaps implement RC better here?
         ds1_2 = ds1_1*I
         ds2_2 = (1-ds1_1)*I
         s1_1 = s1_1 + step*(ds1_1 - s1_1)
@@ -571,7 +574,7 @@ theta_motif - numpy array, the pwm generated from a subsequence containing the c
 """
 def generate_starting_point(core_re, pos_seqs, W, given_only=False):
     ms = make_dna_re(core_re, given_only)#make a regular expression for both strands
-    m = bisection(0.4,0.25,1)
+    m = bisection(0.1,0.25,1)
     #search through each sequence until find a match far enough from the edges
     #search randomly
     inds = range(len(pos_seqs))
