@@ -6,6 +6,15 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/9/13:
+May want to consider trying without smoothing. Tested a lot. Motifs seem to coalesce
+into a finite number of motifs. May consider just erasing if this is the case.
+
+8/8/13:
+Pregenerates all indicator matrices now. Next time, keep gamma_0=0.05 and alpha=0.6,
+and try changing bisection gamma to 0.1 and see if I can get the same results (6/10 successes)
+as bisection gamma=0.4.
+
 8/7/13:
 Shuffling subsequences instead of sequences now. Need to optimize it later. For now,
 run multiple times and see how well it works.

@@ -173,7 +173,7 @@ Notes:
 For the Online version, this may need to be removed for RAM purposes.
 """
 def getSubsequences(Y, W):
-    return [[str(Y[y][k:k+W]) for k in xrange(len(Y[y])-W+1)] for y in Y]
+    return [[y[k:k+W] for k in xrange(len(y)-W+1)] for y in Y]
 
 """
 A function to account for repetitive elements. Counts the number
@@ -214,37 +214,38 @@ theta_motif, motif PWM matrix
 theta_background_matrix, background PWM matrix
 lambda_motif, motif frequency
 """
-def Online_EM(Y, numsubs, theta_motif, theta_background_matrix, lambda_motif):
+def Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif):
     W = theta_motif.shape[0]#get the length of the motif
-    #X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
+    X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
     #subsequences are grouped by sequences for normalization purposes
-    #Is = [[sequenceToI(xij) for xij in xi] for xi in X]#list of indicator matrices, same dimensions as X
+    Is = [[sequenceToI(xij) for xij in xi] for xi in X]#list of indicator matrices, same dimensions as X
     s1_1 = lambda_motif#the expected number of occurrences of the motif
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
     s2_2 = theta_background_matrix#the matrix holding the expected number of times a letter appears in each position, background
     n = 0#the counter
     nstart = 100000000#when to start averaging
     N = len(Y)#number of sequences
-    #reserve some memory. this was when each sequence had only one subsequence
-    """fractions = zeros(N)
-    pwms = zeros((N,W,4))
-    backgrounds = zeros((N,4))
-    """
-    #prepare lists because we don't know how many subsequences we have in total
-    fractions = [None]*numsubs#pre-allocate space
-    distances = [None]*numsubs#pre-allocate space
     pwms = list()
     backgrounds = list()
     expectations = list()
     fractions_sum = 0#should be deleted
     pwms_sum = zeros((W,4))#should be deleted
     backgrounds_sum = zeros((W,4))#should be deleted
-    seqindpairs = [[(seqind,subseqind) for subseqind in range(len(Y[seqind]) - W)] for seqind in range(N)]
+    seqindpairs = [[(seqind,subseqind) for subseqind in xrange(len(Is[seqind]))] for seqind in xrange(len(Is))]
     seqindpairs = list(chain(*seqindpairs))
     random.shuffle(seqindpairs)
+    #reserve some memory. this was when each sequence had only one subsequence
+    """fractions = zeros(N)
+    pwms = zeros((N,W,4))
+    backgrounds = zeros((N,4))
+    """
+    #prepare lists because we don't know how many subsequences we have in total
+    fractions = [None]*len(seqindpairs)#pre-allocate space
+    distances = [None]*len(seqindpairs)#pre-allocate space
     #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
     #p = Pool(20)
-    truemotif = load('PWM_29_correct.npy')
+    #truemotif = load('PWM_29_correct.npy')
+    firstmotif = theta_motif#for tracking how much the motif changes
     print "Running Online EM algorithm..."
     for seqindpair in seqindpairs:#iterate through each sequence index and start pair
         seqind = seqindpair[0]
@@ -257,6 +258,7 @@ def Online_EM(Y, numsubs, theta_motif, theta_background_matrix, lambda_motif):
         #for start in starts:
             #I = Is[start]
         step = 0.05*pow(n+1,-0.6)#the online step size. For OLO6a
+        #step = 0.05*pow(n+1,-0.6)#the online step size. Trying other combinations
             #step = 0.025*pow(n+1,-0.6)#the online step size. For OLO6a
             #step = 1.0/10000
             #E-step
@@ -264,16 +266,16 @@ def Online_EM(Y, numsubs, theta_motif, theta_background_matrix, lambda_motif):
         left = max(0,start-W+1)
         right = min(L-W+1,start+W)
         middle = start - left
-        Is = [sequenceToI(s[k:k+W]) for k in range(left,right)]
+        Iss = Is[seqind][left:right]
             #find expected Z values for all W-mers overlapping the current W-mer
-        Z = [Z0_I(I,theta_motif, theta_background_matrix,lambda_motif) for I in Is]
+        Z = [Z0_I(I,theta_motif, theta_background_matrix,lambda_motif) for I in Iss]
             #find the Zs with parallel mapping
             #Z = p.map(functools.partial(Z0_I, theta_motif=theta_motif, theta_background_matrix=theta_background_matrix,lambda_motif=lambda_motif),Is[left:right])
         smooth(Z,W)#smooth the Z values
             #ds1_1 = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif)
         ds1_1 = Z[middle]
             #print y
-        I = Is[middle]
+        I = Iss[middle]
         ds1_2 = ds1_1*I
         ds2_2 = (1-ds1_1)*I
         s1_1 = s1_1 + step*(ds1_1 - s1_1)
@@ -297,7 +299,7 @@ def Online_EM(Y, numsubs, theta_motif, theta_background_matrix, lambda_motif):
             backgrounds_sum = backgrounds_sum + theta_background_matrix
         """
         fractions[n] = lambda_motif
-        distances[n] = dist(theta_motif,truemotif)
+        distances[n] = dist(theta_motif,firstmotif)
             #pwms.append(theta_motif)
             #backgrounds.append(theta_background)
             #if n > nstart, then start using averaged parameters for the upcoming E-step
@@ -629,7 +631,7 @@ def meme(Y,W,NPASSES):
         theta_motif = generate_starting_point(best_word, pos_seqs, W)
         #theta_motif = load('NRSF_test.npy')
         theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
-        theta_motif, theta_background_matrix, lambda_motif, fractions, distances = Online_EM(Y, n, theta_motif, theta_background_matrix, lambda_motif)
+        theta_motif, theta_background_matrix, lambda_motif, fractions, distances = Online_EM(Y, theta_motif, theta_background_matrix, lambda_motif)
         lambda_motifs.append(lambda_motif)
         theta_motifs.append(theta_motif)
         theta_background_matrices.append(theta_background_matrix)
