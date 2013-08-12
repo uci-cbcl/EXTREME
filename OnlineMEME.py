@@ -658,7 +658,7 @@ def outputMotif(lambda_motif, theta_motif, theta_background_matrix, fractions, d
     f_string = sprint_logx(log(lambda_motif), 1, _pv_format)
     print(("Motif {0:s} had a fraction of {1:s}").format(str(k), f_string))
     print 'Saving motif as a png...'
-    data = LogoData.from_counts(counts=theta_motif,alphabet=unambiguous_dna_alphabet)
+    data = LogoData.from_counts(counts=theta_motif,alphabet=unambiguous_dna_alphabet,prior=theta_background_matrix[0])
     options = LogoOptions()
     options.title = 'Motif'
     forma = LogoFormat(data, options)
