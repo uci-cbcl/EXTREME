@@ -6,6 +6,13 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/13/13:
+Slowly, but surely, adding Cython support. Trying to wrap the likelihoods.c function so that I don't have to bother with the details
+and I can just get an E-value.
+
+8/12/13:
+Begin interfacing with C. E-value functions are in likelihood.c (about line 139).
+
 8/9/13:
 May want to consider trying without smoothing. Tested a lot. Motifs seem to coalesce
 into a finite number of motifs. May consider just erasing if this is the case.
