@@ -35,7 +35,7 @@ std - standard deviation of sequence size. if 0, uniform lengths
 Output:
 seq - the sequence string
 """
-def genseq(bg, pwm, mu = 200, std = 0):
+def genseq(bg, pwm, mu = 10, std = 0):
     if pwm == None:
         motifwidth = 0#if there is no motif, then 0 motif width
     else:
@@ -59,7 +59,7 @@ def genseq(bg, pwm, mu = 200, std = 0):
 Input:
 fracsMotif - a list of fractions of the motif(s)
 """
-def makeFASTA(fastafilename, bg, pwms, fracsMotif, n):
+def makeFASTA(fastafilename, bg, pwms, fracsMotif, l, n):
     output_handle = open(fastafilename, 'w')
     bgfrac = 1 - sum(fracsMotif)
     fracsMotif.insert(0,bgfrac)#first element is fraction of no motif
@@ -70,7 +70,7 @@ def makeFASTA(fastafilename, bg, pwms, fracsMotif, n):
     pwmiters = [repeat(pwm, freq) for pwm, freq in zip(pwms, freqsMotif)]#a list of iterables for sequence generation
     pwmchain = chain(*pwmiters)
     l = sum(freqsMotif)
-    frags = [SeqRecord(Seq(genseq(bg,pwm),IUPAC.ambiguous_dna),'fragment_%i' % (i+1),'','') for pwm, i in izip(pwmchain,xrange(l))]
+    frags = [SeqRecord(Seq(genseq(bg,pwm,mu=l),IUPAC.ambiguous_dna),'fragment_%i' % (i+1),'','') for pwm, i in izip(pwmchain,xrange(l))]
     #I just want to avoid for loops. Generate all seqrecords to be written to file
     SeqIO.write(frags, output_handle, "fasta")
     output_handle.close()
@@ -103,8 +103,8 @@ def backgroundParse(filename):
 
 """
 Accepts a string float and returns a float list. If float string cannot be converted,
-it is assumed it is a filename. The filename should have the same number of lines as
-there are motifs. 
+it is assumed it is a filename. The file should have the same number of lines as
+there are motifs. Used for the user specified option of motif fraction. 
 """
 def fracsParse(fracstring):
     try:
@@ -125,7 +125,8 @@ if __name__ == "__main__":
     parser.add_option("-m", "--motif", help="File holding motif(s). Default: no motifs")
     parser.add_option("-b", "--background", help="Background file. Default: 0-order equal distribution")    
     parser.add_option("-n", "--numsequences", help="Number of sequences to write. Default:100", default="100")
-    parser.add_option("-f", "--fraction", help="Fraction of sequences containing motif. Default:0.5", default="0.5")    
+    parser.add_option("-f", "--fraction", help="Fraction of sequences containing motif. Default:0.5", default="0.5") 
+    parser.add_option("-l", "--length", help="Average length of sequences. Default: same as motif width", default="0")   
     (options, args) = parser.parse_args()
     #As of 4/9/13, work on motif parsers
     pwms = motifParse(options.motif,'motiflist')
@@ -136,4 +137,7 @@ if __name__ == "__main__":
     fastafilename = args[0]
     n = int(options.numsequences)
     fracsMotif = fracsParse(options.fraction)
-    makeFASTA(fastafilename, bg, pwms, fracsMotif, n)
+    l = int(options.length)
+    if l == 0:
+        l = max([x.shape[0] for x in pwms])
+    makeFASTA(fastafilename, bg, pwms, fracsMotif, l, n)
