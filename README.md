@@ -8,7 +8,7 @@ Notes
 -----
 8/13/13:
 Slowly, but surely, adding Cython support. Trying to wrap the likelihoods.c function so that I don't have to bother with the details
-and I can just get an E-value.
+and I can just get an E-value. EXTERN and DEXTERN definitions are messing things up for some reason.
 
 8/12/13:
 Begin interfacing with C. E-value functions are in likelihood.c (about line 139).
