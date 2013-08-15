@@ -6,6 +6,12 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/14/13:
+Finally, after much crying, I am able to call the calc_entropy function with Cython,
+as confirmed when it printed Entropy! when I used the calc_ent function in the MEME
+class I made. After messing around with pointers and stuff, I can get C code to print
+what I did in python and I can get python to print what I did in C code.
+
 8/13/13:
 Slowly, but surely, adding Cython support. Trying to wrap the likelihoods.c function so that I don't have to bother with the details
 and I can just get an E-value. EXTERN and DEXTERN definitions are messing things up for some reason.

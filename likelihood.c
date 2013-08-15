@@ -149,6 +149,23 @@ void calc_entropy (
 
 /**********************************************************************/
 /*
+	dq_test
+
+	Test how well this thing actually works
+*/
+/**********************************************************************/
+void dq_test (
+  MODEL *model,			/* the model */
+  DATASET *dataset  		/* the dataset */
+)
+{
+  printf("%i \n", model->w);
+  model->ic = 5.0;
+
+} /* dq_test */
+
+/**********************************************************************/
+/*
         log_comb
  
         Compute logarithm of m choose n.
