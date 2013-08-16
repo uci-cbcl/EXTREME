@@ -159,8 +159,19 @@ void dq_test (
   DATASET *dataset  		/* the dataset */
 )
 {
+  int i,j;
   printf("%i \n", model->w);
-  model->ic = 5.0;
+  THETA obs = model->obs;			/* observed frequencies */
+  int w = model->w;
+  int alength = dataset->alength;
+  double *back = dataset->back;			/* background model freqs */
+  back[0] = back[0] * 3.0;
+  model->ic = back[0];
+  for (i=0; i<w; i++) {			/* position */
+  	for (j=0; j<alength; j++) {		/* alphabet letter */
+  		printf("%f \n", obs(i,j));
+  	}
+  }
 
 } /* dq_test */
 

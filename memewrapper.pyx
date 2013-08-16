@@ -1,3 +1,6 @@
+import numpy as np
+cimport numpy as np
+from libc.stdlib cimport malloc
 #cdef extern from "logs.h":
 #    void init_log()
 
@@ -13,40 +16,55 @@ cdef extern from "mtype.h":
         Tcm, Oops, Zoops
 
 cdef extern from "meme.h":
+    ctypedef double **THETA
     ctypedef struct SAMPLE:
         long length
     ctypedef struct DATASET:
         int alength
-        int nmotifs
+        int n_samples
         char *alphabet
         double *back
+        SAMPLE **samples
     ctypedef struct MODEL:
+        THETA obs
         int w
+        int nsites_dis
         MOTYPE mtype
         BOOLEAN pal
         BOOLEAN invcomp
         double *rentropy
+        double rel
         double ic
-        double logpv
         double logev
         double llr
 
     void calc_entropy(MODEL *model, DATASET *dataset)
     void dq_test(MODEL *model, DATASET *dataset)
 
+cdef double** npy2d_double2d(np.ndarray[double, ndim=2, mode="c"] a):
+    cdef double **tmp_c = <double**> malloc(a.shape[0] * sizeof(double*))
+    for k in range(a.shape[0]):
+        tmp_c[k] = &a[k,0]
+    return tmp_c
+
 cdef class MEME:
     cdef MODEL m
     cdef DATASET d
-    def __cinit__(self, theta_motif, theta_background, lambda_motif, sequences):
-        #cdef MODEL mo
-        #cdef DATASET da
-        self.m.w = 2
+    cdef pwm
+    cdef background
+    def __cinit__(self, np.ndarray[double, ndim=2, mode="c"] theta_motif, np.ndarray[double, ndim=1, mode="c"] theta_background, lambda_motif, sequences):
+        self.pwm = theta_motif
+        self.background = theta_background
+        self.m.w = theta_motif.shape[0]
         self.m.mtype = Tcm
         self.m.pal = 0
-        #self.m = &mo 
-        self.d.alength = 4
+        self.m.invcomp = 1
+        print theta_motif
+        print theta_background
+        self.m.obs = npy2d_double2d(theta_motif)
+        self.d.back = &theta_background[0]
+        self.d.alength = len(theta_background)
         self.d.alphabet = "ACGT"
-        #self.d = &da
         x = 2
 
     def calc_ent(self):
@@ -55,4 +73,9 @@ cdef class MEME:
     def dq(self):
         dq_test(&self.m,&self.d)
         print self.m.ic
+        print self.pwm
+        print self.background
+        
+
+        
         

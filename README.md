@@ -6,6 +6,13 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/15/13:
+Finally can pass arrays between C and python. It turns out that in python classes,
+variables will be deleted from memory once a constructor is complete unless that
+variable is saved as a class variable. Cython doesn't have built-in multi-dimensional
+array support, so I had to do some tinkering. Next time calculate relative entropy,
+include sample lengths, and discover sites of a motif.
+
 8/14/13:
 Finally, after much crying, I am able to call the calc_entropy function with Cython,
 as confirmed when it printed Entropy! when I used the calc_ent function in the MEME
