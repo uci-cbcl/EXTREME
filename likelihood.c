@@ -159,6 +159,7 @@ void dq_test (
   DATASET *dataset  		/* the dataset */
 )
 {
+  int nseqs = dataset->n_samples;		/* number of sequences */
   int i,j;
   printf("%i \n", model->w);
   THETA obs = model->obs;			/* observed frequencies */
@@ -172,7 +173,7 @@ void dq_test (
   		printf("%f \n", obs(i,j));
   	}
   }
-
+  for (i=0; i< nseqs; i++) printf("%i \n",dataset->samples[i]->length);
 } /* dq_test */
 
 /**********************************************************************/

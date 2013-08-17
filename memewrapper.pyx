@@ -53,19 +53,30 @@ cdef class MEME:
     cdef pwm
     cdef background
     def __cinit__(self, np.ndarray[double, ndim=2, mode="c"] theta_motif, np.ndarray[double, ndim=1, mode="c"] theta_background, lambda_motif, sequences):
+        #these lines make sure the arrays don't disappear
         self.pwm = theta_motif
         self.background = theta_background
         self.m.w = theta_motif.shape[0]
         self.m.mtype = Tcm
         self.m.pal = 0
         self.m.invcomp = 1
+        #reserve some space for rentropy, which will get assigned in C
+        self.d.rentropy = <double*> malloc(self.m.w * sizeof(double))
         print theta_motif
         print theta_background
+        #malloc tricks to convert 2D numpy array to double**
         self.m.obs = npy2d_double2d(theta_motif)
         self.d.back = &theta_background[0]
         self.d.alength = len(theta_background)
         self.d.alphabet = "ACGT"
-        x = 2
+        self.d.n_samples = len(sequences)
+        #do some malloc tricks to get an array of SAMPLE pointers
+        cdef SAMPLE* ss = <SAMPLE*> malloc(self.d.n_samples * sizeof(SAMPLE))
+        self.d.samples = <SAMPLE**> malloc(self.d.n_samples * sizeof(SAMPLE*))
+        for i in range(self.d.n_samples):
+            ss[i].length = len(sequences[i])
+            self.d.samples[i] = &ss[i]
+        x = 3
 
     def calc_ent(self):
         calc_entropy(&self.m, &self.d)

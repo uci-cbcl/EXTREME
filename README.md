@@ -6,6 +6,9 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/16/13:
+Must figure out nsites_dis next.
+
 8/15/13:
 Finally can pass arrays between C and python. It turns out that in python classes,
 variables will be deleted from memory once a constructor is complete unless that
