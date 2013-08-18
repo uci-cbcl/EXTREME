@@ -52,7 +52,7 @@ cdef class MEME:
     cdef DATASET d
     cdef pwm
     cdef background
-    def __cinit__(self, np.ndarray[double, ndim=2, mode="c"] theta_motif, np.ndarray[double, ndim=1, mode="c"] theta_background, lambda_motif, sequences):
+    def __cinit__(self, np.ndarray[double, ndim=2, mode="c"] theta_motif, np.ndarray[double, ndim=1, mode="c"] theta_background, lambda_motif, sequences, int nsites_dis):
         #these lines make sure the arrays don't disappear
         self.pwm = theta_motif
         self.background = theta_background
@@ -60,8 +60,11 @@ cdef class MEME:
         self.m.mtype = Tcm
         self.m.pal = 0
         self.m.invcomp = 1
+        self.m.nsites_dis = nsites_dis
+        #do not need to reserve space for rentropy. C code already did that
         #reserve some space for rentropy, which will get assigned in C
-        self.d.rentropy = <double*> malloc(self.m.w * sizeof(double))
+        #cdef double *rentropy = <double*> malloc(self.m.w * sizeof(double))
+        #self.m.rentropy = rentropy #<double*> malloc(self.m.w * sizeof(double))
         print theta_motif
         print theta_background
         #malloc tricks to convert 2D numpy array to double**
@@ -80,6 +83,9 @@ cdef class MEME:
 
     def calc_ent(self):
         calc_entropy(&self.m, &self.d)
+    
+    def get_logev(self):
+        return self.m.logev
         
     def dq(self):
         dq_test(&self.m,&self.d)

@@ -6,6 +6,10 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/17/13:
+Figured out nsites_dis using the heuristic from Bailey and Elkan. Next time account
+for both strands. Right now motif scanning only on one strand.
+
 8/16/13:
 Must figure out nsites_dis next.
 
