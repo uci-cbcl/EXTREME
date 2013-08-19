@@ -86,6 +86,12 @@ cdef class MEME:
     
     def get_logev(self):
         return self.m.logev
+    
+    def get_rentropy(self):
+        r = np.zeros(self.m.w)
+        for i in range(self.m.w):
+            r[i] = self.m.rentropy[i]
+        return r
         
     def dq(self):
         dq_test(&self.m,&self.d)

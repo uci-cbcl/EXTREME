@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from argparse import ArgumentParser
-import os
 import dreme as dre
 import random
 import copy
@@ -11,11 +10,9 @@ import sequence
 from numpy import mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, ones, concatenate
 #from numpy.random import rand
 #from pylab import imread, imshow, plot, show
-from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, unambiguous_dna_alphabet
 from itertools import chain
 #from bisect import bisect_left
 #import functools
-import time
 import meme as me
 
 """
@@ -621,6 +618,7 @@ def meme(Y,W,NPASSES,revcomp=True):
     #p = Pool(64)
     #s=p.map(functools.partial(f,y=Y),range(64))
     #print s
+    BIGLOG = log(sys.float_info.max)
     n = sum([max(0,len(y) - W + 1) for y in Y])#gets number of subsequences
     pos_seqs = Y
     print "Shuffling positive sequences..."
@@ -637,10 +635,10 @@ def meme(Y,W,NPASSES,revcomp=True):
     fractionses = list()
     distanceses = list()
     logevs = list()
+    #Use DREME to find a core seed
+    (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
+        find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
     for npass in range(NPASSES):
-        #Use DREME to find a core seed
-        (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
-                find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
         #From DREME's best re, predict the fraction 
         if revcomp:
             lambda_motif = 1.0*pos/n
@@ -658,11 +656,17 @@ def meme(Y,W,NPASSES,revcomp=True):
         print 'Finding number of motif sites'
         nsites_dis = get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is)
         print 'Found ' + str(nsites_dis) + ' sites'
-        mm = me.MEME(theta_motif, theta_background_matrix[0], lambda_motif, Y, nsites_dis)
-        print 'Calculating log E-value'
-        mm.calc_ent()
-        print mm.get_logev()
-        logevs.append(mm.get_logev())
+        #if there are too many discovered sites, something is wrong, so assign a high E-value
+        if nsites_dis > 10*len(Y):#for now, assume problem if more than 10 instances per sequence
+            print 'Too many sites found. Setting log E-value to max value'
+            logev = BIGLOG
+        else:    
+            mm = me.MEME(theta_motif, theta_background_matrix[0], lambda_motif, Y, nsites_dis)
+            print 'Calculating log E-value'
+            mm.calc_ent()
+            logev = mm.get_logev()
+            print 'Log E-value: ' + str(logev)
+        logevs.append(logev)
         lambda_motifs.append(lambda_motif)
         theta_motifs.append(theta_motif)
         theta_background_matrices.append(theta_background_matrix)
@@ -722,6 +726,7 @@ k - the motif number index
 outstr - the prefix for the output files
 """
 def outputMotif(theta_motif, theta_background_matrix, lambda_motif, fractions, distances, logev, k, outstr):
+    from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, unambiguous_dna_alphabet
     _pv_format = "%3.1fe%+04.0f"
     f_string = dre.sprint_logx(log(lambda_motif), 1, _pv_format)
     g_string = dre.sprint_logx(logev, 1, _pv_format)
@@ -764,8 +769,11 @@ def main():
     parser.add_argument("-minw", dest="minwidth", help="Minimum width of the motif to search for", type=int, default=8)
     parser.add_argument("-maxw", dest="maxwidth", help="Maximum width of the motif to search for", type=int, default=40)
     parser.add_argument("-m", "--nummotifs", dest="nummotifs", help="Number of motifs to search for", type=int, default=1)
+    parser.add_argument("-s", "--seed", dest="seed", help="Random seed", type=int, default=1)
     parser.add_argument("-o", "--output", dest="output", help="Folder for all output files", default="output")    
     args = parser.parse_args()
+    seed = args.seed
+    random.seed(seed)
     w = args.width
     if w == 0:
         minw = args.minwidth
@@ -775,6 +783,7 @@ def main():
         maxw = w
     nmotifs = args.nummotifs
     # make the directory (recursively)
+    import os
     outdir = args.output
     outpre = outdir + "/"
     clobber = True
@@ -786,6 +795,7 @@ def main():
                 print >> sys.stderr, ("output directory (%s) already exists "
                 "but DREME was not told to clobber it") % (outdir); sys.exit(1)
         else: raise
+    import time
     print "Started at:"
     print time.ctime()
     #Use DREME's SeqIO to read in FASTA to list
