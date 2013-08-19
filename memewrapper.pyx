@@ -65,8 +65,8 @@ cdef class MEME:
         #reserve some space for rentropy, which will get assigned in C
         #cdef double *rentropy = <double*> malloc(self.m.w * sizeof(double))
         #self.m.rentropy = rentropy #<double*> malloc(self.m.w * sizeof(double))
-        print theta_motif
-        print theta_background
+        #print theta_motif
+        #print theta_background
         #malloc tricks to convert 2D numpy array to double**
         self.m.obs = npy2d_double2d(theta_motif)
         self.d.back = &theta_background[0]

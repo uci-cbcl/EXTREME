@@ -220,7 +220,7 @@ theta_motif, motif PWM matrix
 theta_background_matrix, background PWM matrix
 lambda_motif, motif frequency
 """
-def Online_EM(Is, theta_motif, theta_background_matrix, lambda_motif, smoothing=False):
+def Online_EM(Is, theta_motif, theta_background_matrix, lambda_motif, smoothing=False, revcomp=True):
     W = theta_motif.shape[0]#get the length of the motif
     s1_1 = lambda_motif#the expected number of occurrences of the motif
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
@@ -281,9 +281,16 @@ def Online_EM(Is, theta_motif, theta_background_matrix, lambda_motif, smoothing=
             ds1_1 = Z[middle]
             #print y
             I = Iss[middle]
-        else:
+        else:#work here next 8/18/13
             I = Is[seqind][start]
-            ds1_1 = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif)#perhaps implement RC better here?
+            Z = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif)#perhaps implement RC better here?
+            if revcomp:
+                Ir = I_rc(I)
+                Zr = Z0_I(Ir,theta_motif, theta_background_matrix,lambda_motif)
+                if Zr > Z:
+                    Z = Zr
+                    I = Ir
+            ds1_1 = Z
         ds1_2 = ds1_1*I
         ds2_2 = (1-ds1_1)*I
         s1_1 = s1_1 + step*(ds1_1 - s1_1)
@@ -609,7 +616,7 @@ NPASSES, number of distinct motifs to search for
 Output:
 fractions
 """
-def meme(Y,W,NPASSES):
+def meme(Y,W,NPASSES,revcomp=True):
     #6/28/13, check with initial conditions matching solution
     #p = Pool(64)
     #s=p.map(functools.partial(f,y=Y),range(64))
@@ -635,7 +642,10 @@ def meme(Y,W,NPASSES):
         (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
                 find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
         #From DREME's best re, predict the fraction 
-        lambda_motif = 1.0*pos/n/2#dividing by 2 accounts for the fact that RC not accounted for
+        if revcomp:
+            lambda_motif = 1.0*pos/n
+        else:
+            lambda_motif = 1.0*pos/n/2#dividing by 2 accounts for the fact that RC not accounted for
         #From the best RE, search the positive sequence set and generate a starting PWM
         X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
         #subsequences are grouped by sequences for normalization purposes
@@ -661,8 +671,20 @@ def meme(Y,W,NPASSES):
     return lambda_motifs, theta_motifs, theta_background_matrices, fractionses, distanceses, logevs
 
 """
+Given an indicator matrix, return its reverse complement.
+
+Input:
+I, indicator matrix
+
+Output:
+I_rc, reverse complement of the indicator matrix
+"""
+def I_rc(I):
+    return I[::-1,::-1]	
+
+"""
 Finds the number of discrete motif sites. Uses the threshold decision theory strategy
-from Bailey and Elkan
+from Bailey and Elkan. Currently searches both strands.
 
 Input:
 Is, list of lists of indicator matrices. dataset of sequences
@@ -674,13 +696,17 @@ Output:
 nsites_dis, integer number of discovered motif sites
 
 """
-def get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is):
+def get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is, revcomp=True):
     t = log((1-lambda_motif)/lambda_motif)
     spec = log(theta_motif/theta_background_matrix)
     nsites_dis = 0
     for s in Is:
         for I in s:
-            nsites_dis += sum(spec*I) > t
+            if revcomp:
+                a = sum(spec*I) > t or sum(spec*I_rc(I)) > t
+            else:
+                a = sum(spec*I) > t
+            nsites_dis += a
     return nsites_dis    
 """
 Outputs the motif as a web logo. Saves fractions as .npy.

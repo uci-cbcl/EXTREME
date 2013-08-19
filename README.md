@@ -6,6 +6,12 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/18/13:
+Properly implemented reverse complements. Can discover sites on both strands.
+The Z that contributes to the EM step is the one (either current strand or
+reverse complement strand) that is biggest. This has so far improved the success
+rate of finding the motif.
+
 8/17/13:
 Figured out nsites_dis using the heuristic from Bailey and Elkan. Next time account
 for both strands. Right now motif scanning only on one strand.
