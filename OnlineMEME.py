@@ -7,7 +7,7 @@ import errno
 import sys
 import sequence
 #from multiprocessing import Pool
-from numpy import mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, ones, concatenate
+from numpy import mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, ones, concatenate, argmin
 #from numpy.random import rand
 #from pylab import imread, imshow, plot, show
 from itertools import chain
@@ -640,6 +640,8 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,revcomp=True):
     #Use DREME to find a core seed
     (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
         find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
+    print str(pos) + ' positive sites'
+    print str(neg) + ' negative sites'
     W = Wmin
     while W <= Wmax:
         n = sum([max(0,len(y) - W + 1) for y in Y])#gets number of subsequences
@@ -689,7 +691,18 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,revcomp=True):
             else:
                 print 'Motif E-value exceeded threshold. Trying again...'
         W = int(round(W*sqrt(2)))
-    return lambda_motifs, theta_motifs, theta_background_matrices, fractionses, distanceses, logevs
+    #went through all widths, now pick motif with best E-value
+    best_index = argmin(logevs)
+    best_theta_motif = theta_motifs[best_index]
+    best_theta_background_matrix = theta_background_matrices[best_index]
+    best_lambda_motif = lambda_motifs[best_index]
+    #erase motif sites from positive and negative sequences
+    erase_motif(best_theta_motif, best_theta_background_matrix, best_lambda_motif, pos_seqs, neg_seqs)
+    (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
+        find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
+    print str(pos) + ' positive sites'
+    print str(neg) + ' negative sites'
+    return theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs
 
 """
 Return a trimmed PWM such that the outer columns below the threshold are removed.
@@ -717,7 +730,9 @@ def trim_PWM(theta_motif, rentropy, rthresh):
 
 """
 Searches for motif instances in the positive and negative sequences and replaces
-with N's.
+with N's. It should be noted that as the motif has been trimmed, the score will
+be reduced (scores are purely additive by column), and the threshold is not
+adjusted for the trimming.
 
 Input: 
 theta_motif, the PWM (assumed to be trimmed already)
@@ -727,10 +742,65 @@ pos_seqs, list of positive sequences
 neg_seqs, list of negative sequences
 
 Output:
-Updated positive and negative sequences with deleted 
+Updated positive and negative sequences with motif sites deleted
+Also output number of sites erased in both sequence sets
 """
-def erase_motif(theta_motif, theta_background_matrix, lambda_motif, pos_seqs, neg_seqs):
-    return 0
+def erase_motif(theta_motif, theta_background_matrix, lambda_motif, pos_seqs, neg_seqs, revcomp=True):
+    t = log((1-lambda_motif)/lambda_motif)#Threshold
+    spec = log(theta_motif/theta_background_matrix)#spec matrix
+    W = theta_motif.shape[0]#width of the motif
+    ens = W * 'N'#N sequence to replace motif sites with
+    pos_nsites_dis = 0
+    print 'Erasing motif from positive sequences'
+    for i in range(len(pos_seqs)):
+        s = pos_seqs[i]#grab the string
+        L = len(s)
+        end = L - W + 1#go to last W-mer of sequence
+        j = 0
+        while j < end:
+            subs = s[j:j+W]#grab the subsequence
+            if 'N' in subs:#ignore subsequences with deleted portions
+                j += 1
+                continue
+            I = sequenceToI(subs)#subsequence has no deleted portions, so make indicator matrix
+            if revcomp:
+                #a is boolean that tells whether a hit is found
+                a = sum(spec*I) > t or sum(spec*I_rc(I)) > t
+            else:
+                a = sum(spec*I) > t
+            if a:#hit found, increment, erase, and move index
+                pos_nsites_dis += 1
+                s = s[0:j] + ens + s[j+W:]
+                j += W
+            else:#no hit found, move index up by 1
+                j += 1
+        pos_seqs[i] = s#done erasing, store result
+    print 'Erased ' + str(pos_nsites_dis) + ' sites from the positive sequences'        
+    neg_nsites_dis = 0
+    for i in range(len(neg_seqs)):
+        s = neg_seqs[i]#grab the string
+        L = len(s)
+        end = L - W + 1#go to last W-mer of sequence
+        j = 0
+        while j < end:
+            subs = s[j:j+W]#grab the subsequence
+            if 'N' in subs:#ignore subsequences with deleted portions
+                j += 1
+                continue
+            I = sequenceToI(subs)#subsequence has no deleted portions, so make indicator matrix
+            if revcomp:
+                #a is boolean that tells whether a hit is found
+                a = sum(spec*I) > t or sum(spec*I_rc(I)) > t
+            else:
+                a = sum(spec*I) > t
+            if a:#hit found, increment, erase, and move index
+                neg_nsites_dis += 1
+                s = s[0:j] + ens + s[j+W:]
+                j += W
+            else:#no hit found, move index up by 1
+                j += 1
+        neg_seqs[i] = s#done erasing, store result
+    print 'Erased ' + str(neg_nsites_dis) + ' sites from the negative sequences'
 
 
 """
@@ -760,9 +830,9 @@ nsites_dis, integer number of discovered motif sites
 
 """
 def get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is, revcomp=True):
-    t = log((1-lambda_motif)/lambda_motif)
-    spec = log(theta_motif/theta_background_matrix)
-    nsites_dis = 0
+    t = log((1-lambda_motif)/lambda_motif)#Threshold
+    spec = log(theta_motif/theta_background_matrix)#spec matrix
+    nsites_dis = 0#discrete sites discovered
     for s in Is:
         for I in s:
             if revcomp:
@@ -863,9 +933,9 @@ def main():
     print time.ctime()
     #Use DREME's SeqIO to read in FASTA to list
     seqs = sequence.convert_ambigs(sequence.readFASTA(args.fastafile, None, True))
-    lambda_motifs, theta_motifs, theta_background_matrices, fractionses, distanceses, logevs = meme(seqs,minw,maxw,nmotifs,ethresh,rthresh)
+    theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs = meme(seqs,minw,maxw,nmotifs,ethresh,rthresh)
     k = 1
-    for lambda_motif, theta_motif, theta_background_matrix, fractions, distances, logev in zip(lambda_motifs, theta_motifs, theta_background_matrices, fractionses, distanceses, logevs):
+    for theta_motif, theta_background_matrix, lambda_motif, fractions, distances, logev in zip(theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs):
         outputMotif(theta_motif, theta_background_matrix, lambda_motif, fractions, distances, logev, k, outpre)
         k = k+1
     print "Ended at:"

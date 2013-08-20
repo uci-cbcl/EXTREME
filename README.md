@@ -6,6 +6,11 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/20/13:
+Erasing is implemented. On the GM12878 data, it deletes 1948/60 sites from the positive/negative sequences.
+On the second round of DREME, it discovers an additional 479 instances of the short motifs. Possibly the 
+non-canonical binding site.
+
 8/19/13:
 Searches multiple motif widths and selects model with lowest E-value and trims
 PWM outer columns given a threshold. Next: deleting old instances.

@@ -1,12 +1,6 @@
 import numpy as np
 cimport numpy as np
 from libc.stdlib cimport malloc
-#cdef extern from "logs.h":
-#    void init_log()
-
-#init_log()
-
-print 'wassaup'
 
 cdef extern from "macros.h":
     ctypedef int BOOLEAN 
