@@ -6,6 +6,10 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/19/13:
+Searches multiple motif widths and selects model with lowest E-value and trims
+PWM outer columns given a threshold. Next: deleting old instances.
+
 8/18/13:
 Properly implemented reverse complements. Can discover sites on both strands.
 The Z that contributes to the EM step is the one (either current strand or
