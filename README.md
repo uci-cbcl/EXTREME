@@ -7,9 +7,16 @@ An Online implementation of the MEME algorithm
 Notes
 -----
 8/20/13:
-Erasing is implemented. On the GM12878 data, it deletes 1948/60 sites from the positive/negative sequences.
-On the second round of DREME, it discovers an additional 479 instances of the short motifs. Possibly the 
-non-canonical binding site.
+Erasing is implemented. On the GM12878 data, it first finds 1760/308 instances of the core in the 
+positive/negative sequences. After motif discovery and motif trimming, it erases 1943/65 sites from the
+positive/negative sequences. On the second round of DREME, it discovers 482/79 sites of pretty much the 
+core in the positive/negative sequences.
+
+Were N's messing up my results before?
+
+With gamma=0.3, may have discovered a new noncanonical binding site. Next time, run program
+for many different sets of parameters, look at results, and heuristically determine patterns for
+highest success rate. May also consider "bisection" strategy.
 
 8/19/13:
 Searches multiple motif widths and selects model with lowest E-value and trims

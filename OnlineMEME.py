@@ -75,9 +75,11 @@ theta_background_matrix, a matrix. Essentially a PWM of the background model.
 lambda_motif, a double. The fraction of motifs among the sequences.
 
 Output:
-Z0 - Expected value of Z for the the indicator matrix I
+Z0 - Expected value of Z for the the indicator matrix I. Returns 0 if I is None
 """
 def Z0_I(I,theta_motif, theta_background_matrix,lambda_motif):
+    if I is None:
+        return 0
     a = pI_motif(I,theta_motif)*lambda_motif#saves a calculation
     b = pI_background(I,theta_background_matrix)*(1-lambda_motif)#saves another calculation
     Z0 = a/(a + b)
@@ -92,9 +94,12 @@ X, a string. The sequence to be converted to an indicator matrix
 
 Output:
 I, a boolean matrix. The indicator matrix. Has dimensions Wx4. Each row is a position along the string.
-Each column represents a nucleotide, in alphabetical order.
+Each column represents a nucleotide, in alphabetical order. If X contains a deleted base pair,
+the returned indicator matrix will be a None.
 """
 def sequenceToI(X):
+    if 'N' in X:
+        return None
     l = array(list(X))#convert the string to an array of characters
     d = array(['A','C','G','T'])#the 4 nucleotides
     I = l[:,newaxis] == d#construct the matrix
@@ -207,7 +212,7 @@ The EM algorithm.
 
 Input:
 Is, list of lists of indicator matrices. dataset of sequences
-numsubs, number of subsequences
+seqindpairs, list of tuples of valid sequence and subsequence indices to use
 theta_motif, motif PWM matrix guess
 theta_background_matrix, background PWM matrix guess
 lambda_motif, motif frequency guess
@@ -217,7 +222,7 @@ theta_motif, motif PWM matrix
 theta_background_matrix, background PWM matrix
 lambda_motif, motif frequency
 """
-def Online_EM(Is, theta_motif, theta_background_matrix, lambda_motif, smoothing=False, revcomp=True):
+def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, smoothing=False, revcomp=True):
     W = theta_motif.shape[0]#get the length of the motif
     s1_1 = lambda_motif#the expected number of occurrences of the motif
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
@@ -231,8 +236,7 @@ def Online_EM(Is, theta_motif, theta_background_matrix, lambda_motif, smoothing=
     fractions_sum = 0#should be deleted
     pwms_sum = zeros((W,4))#should be deleted
     backgrounds_sum = zeros((W,4))#should be deleted
-    seqindpairs = [[(seqind,subseqind) for subseqind in xrange(len(Is[seqind]))] for seqind in xrange(len(Is))]
-    seqindpairs = list(chain(*seqindpairs))
+    #shuffle the seqindpairs
     random.shuffle(seqindpairs)
     #reserve some memory. this was when each sequence had only one subsequence
     """fractions = zeros(N)
@@ -583,7 +587,7 @@ theta_motif - numpy array, the pwm generated from a subsequence containing the c
 """
 def generate_starting_point(core_re, pos_seqs, W, given_only=False):
     ms = dre.make_dna_re(core_re, given_only)#make a regular expression for both strands
-    m = bisection(0.4,0.25,1)
+    m = bisection(0.3,0.25,1)
     #search through each sequence until find a match far enough from the edges
     #search randomly
     inds = range(len(pos_seqs))
@@ -600,7 +604,9 @@ def generate_starting_point(core_re, pos_seqs, W, given_only=False):
             start = start - padding - extra
             end = end + padding
             if start >= 0 and end <= L:#check if starting point is actually inside sequence
-                return startingPoint(sequenceToI(s[start:end]), m)
+                b = s[start:end]
+                if 'N' not in b:#no deleted sequences please
+                    return startingPoint(sequenceToI(b), m)
 
 """
 The main online MEME algorithm.
@@ -615,7 +621,7 @@ rthresh, threshold for relative entropy to trim
 Output:
 fractions
 """
-def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,revcomp=True):
+def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=3,revcomp=True):
     #6/28/13, check with initial conditions matching solution
     #p = Pool(64)
     #s=p.map(functools.partial(f,y=Y),range(64))
@@ -628,81 +634,116 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,revcomp=True):
     unerased_pos_seqs = copy.deepcopy(pos_seqs)
     unerased_neg_seqs = copy.deepcopy(neg_seqs)
     _dna_alphabet = 'ACGT'
-    dprobs = dre.get_probs(neg_seqs, _dna_alphabet)
-    #generate first order Markov background based on nucleotide frequencies
-    theta_background = array([[dprobs['A'], dprobs['C'], dprobs['G'], dprobs['T']]])
-    lambda_motifs = list()
-    theta_motifs = list()
-    theta_background_matrices = list()
-    fractionses = list()
-    distanceses = list()
-    logevs = list()
-    #Use DREME to find a core seed
+    #The discovered motifs and results to be reported
+    discovered_lambda_motifs = list()
+    discovered_theta_motifs = list()
+    discovered_theta_background_matrices = list()
+    discovered_fractionses = list()
+    discovered_distanceses = list()
+    discovered_logevs = list()
+    for npass in range(NPASSES):
+        dprobs = dre.get_probs(neg_seqs, _dna_alphabet)
+        #generate first order Markov background based on nucleotide frequencies
+        theta_background = array([[dprobs['A'], dprobs['C'], dprobs['G'], dprobs['T']]])
+        #lists to hold the motifs and results in this round
+        lambda_motifs = list()
+        theta_motifs = list()
+        theta_background_matrices = list()
+        fractionses = list()
+        distanceses = list()
+        logevs = list()
+        #Use DREME to find a core seed
+        (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
+            find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
+        print str(pos) + ' positive sites'
+        print str(neg) + ' negative sites'
+        W = Wmin
+        while W <= Wmax:
+            #n = sum([max(0,len(y) - W + 1) for y in Y])#gets number of subsequences
+            X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
+            #subsequences are grouped by sequences for normalization purposes
+            Is = [[sequenceToI(xij) for xij in xi] for xi in X]#list of indicator matrices for this specific W, same dimensions as X    
+            #Valid sequence and subsequence index combinations to search. 
+            #subsequences with deleted base pairs will yield a None indicator matrix, which will be ignored in this list
+            seqindpairs = [[(seqind,subseqind) for subseqind in xrange(len(Is[seqind])) if Is[seqind][subseqind] is not None] for seqind in xrange(len(Is))]
+            seqindpairs = list(chain(*seqindpairs))
+            n = len(seqindpairs)#total number of subsequences
+            for t in range(tries):#right now NPASSES is number of tries per width
+                print 'Try ' + str(t + 1) + ' for width ' + str(W)
+                #From DREME's best re, predict the fraction 
+                if revcomp:
+                    lambda_motif = 1.0*pos/n
+                else:
+                    lambda_motif = 1.0*pos/n/2#dividing by 2 accounts for the fact that RC not accounted for
+                #From the best RE, search the positive sequence set and generate a starting PWM
+                print 'Generating starting point from subsequences'
+                theta_motif = generate_starting_point(best_word, pos_seqs, W)
+                #theta_motif = load('NRSF_test.npy')
+                theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
+                theta_motif, theta_background_matrix, lambda_motif, fractions, distances = Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif)
+                if lambda_motif > 10.0*len(Y)/n:
+                    print 'Fraction is too high. Setting log E-value to max value'
+                    print 'Motif E-value exceeded threshold. Trying again...'
+                    continue
+                if lambda_motif < 10.0/n:
+                    print 'Fraction is too low. Setting log E-value to max value'
+                    print 'Motif E-value exceeded threshold. Trying again...'
+                    continue
+                print 'Finding number of motif sites'
+                nsites_dis = get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is)
+                print 'Found ' + str(nsites_dis) + ' sites'
+                #if there are too many discovered sites, something is wrong, so assign a high E-value
+                if nsites_dis > 10*len(Y):#for now, assume problem if more than 10 instances per sequence
+                    print 'Too many sites found. Setting log E-value to max value'
+                    logev = BIGLOG
+                elif nsites_dis < 10:
+                    print 'Less than 10 sites discovered. Setting log E-value to max value'
+                    logev = BIGLOG
+                else:    
+                    mm = me.MEME(theta_motif, theta_background_matrix[0], lambda_motif, Y, nsites_dis)
+                    print 'Calculating log E-value'
+                    mm.calc_ent()
+                    logev = mm.get_logev()
+                    print 'Log E-value: ' + str(logev)
+                    rentropy = mm.get_rentropy()
+                    #trim PWM
+                    theta_motif = trim_PWM(theta_motif, rentropy, rthresh)
+                    #trim the background matrix to same size
+                    theta_background_matrix = theta_background_matrix[0:theta_motif.shape[0],:]
+                if logev < log_ethresh:#if valid motif, save it
+                    print 'Motif E-value less than threshold. Saving and moving to next width...'
+                    logevs.append(logev)
+                    lambda_motifs.append(lambda_motif)
+                    theta_motifs.append(theta_motif)
+                    theta_background_matrices.append(theta_background_matrix)
+                    fractionses.append(fractions)
+                    distanceses.append(distances)
+                    break#break current loop and move onto next width
+                else:
+                    print 'Motif E-value exceeded threshold. Trying again...'
+            W = int(round(W*sqrt(2)))
+        #went through all widths, now pick motif with best E-value
+        best_index = argmin(logevs)
+        best_theta_motif = theta_motifs[best_index]
+        best_theta_background_matrix = theta_background_matrices[best_index]
+        best_lambda_motif = lambda_motifs[best_index]
+        best_fractions = fractionses[best_index]
+        best_distances = distanceses[best_index]
+        best_logev = logevs[best_index]
+        discovered_lambda_motifs.append(best_lambda_motif)
+        discovered_theta_motifs.append(best_theta_motif)
+        discovered_theta_background_matrices.append(best_theta_background_matrix)
+        discovered_fractionses.append(best_fractions)
+        discovered_distanceses.append(best_distances)
+        discovered_logevs.append(best_logev)
+        #erase motif sites from positive and negative sequences
+        erase_motif(best_theta_motif, best_theta_background_matrix, best_lambda_motif, pos_seqs, neg_seqs)
     (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
-        find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
+            find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
     print str(pos) + ' positive sites'
     print str(neg) + ' negative sites'
-    W = Wmin
-    while W <= Wmax:
-        n = sum([max(0,len(y) - W + 1) for y in Y])#gets number of subsequences
-        X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
-        #subsequences are grouped by sequences for normalization purposes
-        Is = [[sequenceToI(xij) for xij in xi] for xi in X]#list of indicator matrices for this specific W, same dimensions as X    
-        for npass in range(NPASSES):#right now NPASSES is number of tries per width
-            print 'Try ' + str(npass + 1) + ' for width ' + str(W)
-            #From DREME's best re, predict the fraction 
-            if revcomp:
-                lambda_motif = 1.0*pos/n
-            else:
-                lambda_motif = 1.0*pos/n/2#dividing by 2 accounts for the fact that RC not accounted for
-            #From the best RE, search the positive sequence set and generate a starting PWM
-            print 'Generating starting point from subsequences'
-            theta_motif = generate_starting_point(best_word, pos_seqs, W)
-            #theta_motif = load('NRSF_test.npy')
-            theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
-            theta_motif, theta_background_matrix, lambda_motif, fractions, distances = Online_EM(Is, theta_motif, theta_background_matrix, lambda_motif)
-            print 'Finding number of motif sites'
-            nsites_dis = get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is)
-            print 'Found ' + str(nsites_dis) + ' sites'
-            #if there are too many discovered sites, something is wrong, so assign a high E-value
-            if nsites_dis > 10*len(Y):#for now, assume problem if more than 10 instances per sequence
-                print 'Too many sites found. Setting log E-value to max value'
-                logev = BIGLOG
-            else:    
-                mm = me.MEME(theta_motif, theta_background_matrix[0], lambda_motif, Y, nsites_dis)
-                print 'Calculating log E-value'
-                mm.calc_ent()
-                logev = mm.get_logev()
-                print 'Log E-value: ' + str(logev)
-                rentropy = mm.get_rentropy()
-                #trim PWM
-                theta_motif = trim_PWM(theta_motif, rentropy, rthresh)
-                #trim the background matrix to same size
-                theta_background_matrix = theta_background_matrix[0:theta_motif.shape[0],:]
-            if logev < log_ethresh:#if valid motif, save it
-                print 'Motif E-value less than threshold. Saving and moving to next width...'
-                logevs.append(logev)
-                lambda_motifs.append(lambda_motif)
-                theta_motifs.append(theta_motif)
-                theta_background_matrices.append(theta_background_matrix)
-                fractionses.append(fractions)
-                distanceses.append(distances)
-                break#break current loop and move onto next width
-            else:
-                print 'Motif E-value exceeded threshold. Trying again...'
-        W = int(round(W*sqrt(2)))
-    #went through all widths, now pick motif with best E-value
-    best_index = argmin(logevs)
-    best_theta_motif = theta_motifs[best_index]
-    best_theta_background_matrix = theta_background_matrices[best_index]
-    best_lambda_motif = lambda_motifs[best_index]
-    #erase motif sites from positive and negative sequences
-    erase_motif(best_theta_motif, best_theta_background_matrix, best_lambda_motif, pos_seqs, neg_seqs)
-    (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
-        find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
-    print str(pos) + ' positive sites'
-    print str(neg) + ' negative sites'
-    return theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs
+    return discovered_theta_motifs, discovered_theta_background_matrices, discovered_lambda_motifs, \
+        discovered_fractionses, discovered_distanceses, discovered_logevs
 
 """
 Return a trimmed PWM such that the outer columns below the threshold are removed.
@@ -775,7 +816,8 @@ def erase_motif(theta_motif, theta_background_matrix, lambda_motif, pos_seqs, ne
             else:#no hit found, move index up by 1
                 j += 1
         pos_seqs[i] = s#done erasing, store result
-    print 'Erased ' + str(pos_nsites_dis) + ' sites from the positive sequences'        
+    print 'Erased ' + str(pos_nsites_dis) + ' sites from the positive sequences'     
+    print 'Erasing motif from negative sequences'   
     neg_nsites_dis = 0
     for i in range(len(neg_seqs)):
         s = neg_seqs[i]#grab the string
@@ -835,6 +877,8 @@ def get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is, revco
     nsites_dis = 0#discrete sites discovered
     for s in Is:
         for I in s:
+            if I is None:#if this location intersects with a deleted base pair, go to next loop step
+                continue
             if revcomp:
                 a = sum(spec*I) > t or sum(spec*I_rc(I)) > t
             else:
