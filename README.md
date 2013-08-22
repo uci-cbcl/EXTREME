@@ -6,6 +6,15 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/21/13:
+Success rate for the canonical motif seems to go up when I double the initial fraction. It seems to allow
+the fraction more time to dip before it hits the point of no return so that it can start rising again.
+May want to consider multiple padding strategy. May also want to consider making the initial step to be
+dependent on the guessed fraction.
+
+Also implemented a thresholding. The frequency is not allowed to dip below 0.01 or rise above 0.97.
+Thresholding results managed to capture a half-site motif.
+
 8/20/13:
 Erasing is implemented. On the GM12878 data, it first finds 1760/308 instances of the core in the 
 positive/negative sequences. After motif discovery and motif trimming, it erases 1943/65 sites from the

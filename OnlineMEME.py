@@ -216,13 +216,16 @@ seqindpairs, list of tuples of valid sequence and subsequence indices to use
 theta_motif, motif PWM matrix guess
 theta_background_matrix, background PWM matrix guess
 lambda_motif, motif frequency guess
+smoothing, whether to smooth (default: False)
+revcomp, whether to use both strands (default: True)
+B, pseudo-counts parameter (default: 0.001)
 
 Output:
 theta_motif, motif PWM matrix
 theta_background_matrix, background PWM matrix
 lambda_motif, motif frequency
 """
-def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, smoothing=False, revcomp=True):
+def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, B=0.1, smoothing=False, revcomp=True):
     W = theta_motif.shape[0]#get the length of the motif
     s1_1 = lambda_motif#the expected number of occurrences of the motif
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
@@ -250,6 +253,10 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
     #p = Pool(20)
     #truemotif = load('PWM_29_correct.npy')
     firstmotif = theta_motif#for tracking how much the motif changes
+    mu = theta_background_matrix#the first background matrix is the average frequencies in the negative set
+    Bmu = B*mu#the priors to be added each step
+    g0 = lambda_motif*15;
+    print g0
     print "Running Online EM algorithm..."
     for seqindpair in seqindpairs:#iterate through each sequence index and start pair
         seqind = seqindpair[0]
@@ -262,7 +269,7 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
         #random.shuffle(starts)#shuffle the starts for randomness
         #for start in starts:
             #I = Is[start]
-        step = 0.05*pow(n+1,-0.6)#the online step size. For OLO6a
+        step = g0*pow(n+1,-0.6)#the online step size. For OLO6a
         #step = 0.05*pow(n+1,-0.6)#the online step size. Trying other combinations
             #step = 0.025*pow(n+1,-0.6)#the online step size. For OLO6a
             #step = 1.0/10000
@@ -300,7 +307,11 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
         s2_2 = s2_2 + step*(ds2_2 - s2_2)
             #M-step
         lambda_motif = s1_1
-        theta_motif = s1_2
+        theta_motif = s1_2# + step*Bmu
+        theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
+        #correct the PWM so that no frequency is too big or small
+        theta_motif[theta_motif>0.97] = 0.97
+        theta_motif[theta_motif<0.01] = 0.01
         theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
         theta_background = s2_2.sum(axis = 0)#collapse the expected background counts into a single array
         theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
@@ -587,7 +598,7 @@ theta_motif - numpy array, the pwm generated from a subsequence containing the c
 """
 def generate_starting_point(core_re, pos_seqs, W, given_only=False):
     ms = dre.make_dna_re(core_re, given_only)#make a regular expression for both strands
-    m = bisection(0.3,0.25,1)
+    m = bisection(0.4,0.25,1)
     #search through each sequence until find a match far enough from the edges
     #search randomly
     inds = range(len(pos_seqs))
@@ -621,7 +632,7 @@ rthresh, threshold for relative entropy to trim
 Output:
 fractions
 """
-def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=3,revcomp=True):
+def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=2,revcomp=True):
     #6/28/13, check with initial conditions matching solution
     #p = Pool(64)
     #s=p.map(functools.partial(f,y=Y),range(64))
@@ -641,6 +652,13 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=3,revcomp=True):
     discovered_fractionses = list()
     discovered_distanceses = list()
     discovered_logevs = list()
+    #All motifs and results to be reported
+    all_lambda_motifs = list()
+    all_theta_motifs = list()
+    all_theta_background_matrices = list()
+    all_fractionses = list()
+    all_distanceses = list()
+    all_logevs = list()
     for npass in range(NPASSES):
         dprobs = dre.get_probs(neg_seqs, _dna_alphabet)
         #generate first order Markov background based on nucleotide frequencies
@@ -672,9 +690,9 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=3,revcomp=True):
                 print 'Try ' + str(t + 1) + ' for width ' + str(W)
                 #From DREME's best re, predict the fraction 
                 if revcomp:
-                    lambda_motif = 1.0*pos/n
+                    lambda_motif = 1.0*pos/n*2#multiply by 2 to account for other seqs
                 else:
-                    lambda_motif = 1.0*pos/n/2#dividing by 2 accounts for the fact that RC not accounted for
+                    lambda_motif = 1.0*pos/n/2*2#dividing by 2 accounts for the fact that RC not accounted for
                 #From the best RE, search the positive sequence set and generate a starting PWM
                 print 'Generating starting point from subsequences'
                 theta_motif = generate_starting_point(best_word, pos_seqs, W)
@@ -711,16 +729,23 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=3,revcomp=True):
                     #trim the background matrix to same size
                     theta_background_matrix = theta_background_matrix[0:theta_motif.shape[0],:]
                 if logev < log_ethresh:#if valid motif, save it
-                    print 'Motif E-value less than threshold. Saving and moving to next width...'
+                    print 'Motif E-value less than threshold. Saving...'
                     logevs.append(logev)
                     lambda_motifs.append(lambda_motif)
                     theta_motifs.append(theta_motif)
                     theta_background_matrices.append(theta_background_matrix)
                     fractionses.append(fractions)
                     distanceses.append(distances)
-                    break#break current loop and move onto next width
+                    #break#break current loop and move onto next width
                 else:
                     print 'Motif E-value exceeded threshold. Trying again...'
+                #save everything
+                all_logevs.append(logev)
+                all_lambda_motifs.append(lambda_motif)
+                all_theta_motifs.append(theta_motif)
+                all_theta_background_matrices.append(theta_background_matrix)
+                all_fractionses.append(fractions)
+                all_distanceses.append(distances)
             W = int(round(W*sqrt(2)))
         #went through all widths, now pick motif with best E-value
         best_index = argmin(logevs)
@@ -742,8 +767,10 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=3,revcomp=True):
             find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
     print str(pos) + ' positive sites'
     print str(neg) + ' negative sites'
-    return discovered_theta_motifs, discovered_theta_background_matrices, discovered_lambda_motifs, \
-        discovered_fractionses, discovered_distanceses, discovered_logevs
+    #return discovered_theta_motifs, discovered_theta_background_matrices, discovered_lambda_motifs, \
+    #    discovered_fractionses, discovered_distanceses, discovered_logevs
+    return all_theta_motifs, all_theta_background_matrices, all_lambda_motifs, \
+        all_fractionses, all_distanceses, all_logevs
 
 """
 Return a trimmed PWM such that the outer columns below the threshold are removed.
@@ -943,7 +970,7 @@ def main():
     parser.add_argument("-maxw", dest="maxwidth", help="Maximum width of the motif to search for", type=int, default=40)
     parser.add_argument("-m", "--nummotifs", dest="nummotifs", help="Number of motifs to search for", type=int, default=1)
     parser.add_argument("-e", "--ethresh", dest="ethresh", help="E-value threshold. Default: 0.05", type=float, default=0.05)
-    parser.add_argument("-r", "--rthresh", dest="rthresh", help="Relative entropy threshold. Default: 0.05", type=float, default=0.05)
+    parser.add_argument("-r", "--rthresh", dest="rthresh", help="Relative entropy threshold. Default: 0.1", type=float, default=0.1)
     parser.add_argument("-s", "--seed", dest="seed", help="Random seed", type=int, default=1)
     parser.add_argument("-o", "--output", dest="output", help="Folder for all output files", default="output")    
     args = parser.parse_args()
