@@ -6,6 +6,12 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+8/22/13:
+Wrote generate_starting_points to generate a list of starting points that are iterated through. For each
+valid core motif hit, it returns a centered starting point and an off-centered starting point (5'
+padding bias). For the GM12878 data, it can easily find the canonical binding site. It uncommonly finds
+the half site. And it only found the noncanonical site once. A g0 of about 0.03 is too small.
+
 8/21/13:
 Success rate for the canonical motif seems to go up when I double the initial fraction. It seems to allow
 the fraction more time to dip before it hits the point of no return so that it can start rising again.

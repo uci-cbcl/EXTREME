@@ -255,7 +255,7 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
     firstmotif = theta_motif#for tracking how much the motif changes
     mu = theta_background_matrix#the first background matrix is the average frequencies in the negative set
     Bmu = B*mu#the priors to be added each step
-    g0 = lambda_motif*15;
+    g0 = lambda_motif*30;
     print g0
     print "Running Online EM algorithm..."
     for seqindpair in seqindpairs:#iterate through each sequence index and start pair
@@ -618,6 +618,61 @@ def generate_starting_point(core_re, pos_seqs, W, given_only=False):
                 b = s[start:end]
                 if 'N' not in b:#no deleted sequences please
                     return startingPoint(sequenceToI(b), m)
+                
+"""
+Generates a list of starting points by finding sequences containing the core RE and follows the
+heuristic in Bailey and Elkan to generate a starting point from the subsequence centered
+on the instance of the core RE. Searches both strands. Pads sides until reached desired width W.
+Does both core centered and core in 5' quartile. Returns 'tries' number for both centered and 
+off-centered, or until end of sequences reached. Centered and off-centered are placed next
+to each other so a starting point is only added if both can fit.
+
+Input:
+core_re - RE of the motif core to search for in the sequences
+pos_seqs - list of strings, the positive set of sequences
+W - width of the pwm to generate
+tries - 
+given_only - whether to search on both strands (default: False)
+
+Output:
+theta_motif - numpy array, the pwm generated from a subsequence containing the core motif
+"""
+def generate_starting_points(core_re, pos_seqs, W, tries, given_only=False):
+    ms = dre.make_dna_re(core_re, given_only)#make a regular expression for both strands
+    m = bisection(0.4,0.25,1)
+    #search through each sequence until find a match far enough from the edges
+    #search randomly
+    inds = range(len(pos_seqs))
+    random.shuffle(inds)
+    starting_points = list()#list of starting points
+    for ind in inds:
+        s = pos_seqs[ind]
+        a = ms.search(s)#search sequence for RE
+        if a:#if the sequence contains the RE
+            L = len(s)
+            (start, end) = a.span()
+            core_width = end - start#width of the core found
+            padding = (W - core_width)/2#padding to add to both sides (rounded down)
+            extra = W - padding - padding - core_width#just in case
+            start1 = start - padding - extra
+            end1 = end + padding
+            #for the off-centered padding
+            total_padding = W - core_width
+            left_padding = total_padding*3/4
+            right_padding = total_padding*1/4
+            extra = W - left_padding - right_padding - core_width#just in case
+            start2 = start - left_padding - extra
+            end2 = end + right_padding
+            if start1 >= 0 and end1 <= L and start2 >= 0 and end2 <= L:#check if starting point is actually inside sequence
+                b = s[start1:end1]
+                c = s[start2:end2]
+                if 'N' not in b and 'N' not in c:#no deleted sequences please
+                    starting_points.append(startingPoint(sequenceToI(b), m))
+                    starting_points.append(startingPoint(sequenceToI(c), m))
+                    tries -= 1
+                    if tries == 0:
+                        break
+    return starting_points
 
 """
 The main online MEME algorithm.
@@ -632,7 +687,7 @@ rthresh, threshold for relative entropy to trim
 Output:
 fractions
 """
-def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=2,revcomp=True):
+def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,revcomp=True):
     #6/28/13, check with initial conditions matching solution
     #p = Pool(64)
     #s=p.map(functools.partial(f,y=Y),range(64))
@@ -686,26 +741,47 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=2,revcomp=True):
             seqindpairs = [[(seqind,subseqind) for subseqind in xrange(len(Is[seqind])) if Is[seqind][subseqind] is not None] for seqind in xrange(len(Is))]
             seqindpairs = list(chain(*seqindpairs))
             n = len(seqindpairs)#total number of subsequences
-            for t in range(tries):#right now NPASSES is number of tries per width
+            print 'Generating starting points from subsequences'
+            starting_points = generate_starting_points(best_word, pos_seqs, W, tries)
+            #for t in range(tries):#right now NPASSES is number of tries per width
+            t = 0
+            for theta_motif in starting_points:
                 print 'Try ' + str(t + 1) + ' for width ' + str(W)
+                t += 1
                 #From DREME's best re, predict the fraction 
                 if revcomp:
                     lambda_motif = 1.0*pos/n*2#multiply by 2 to account for other seqs
                 else:
                     lambda_motif = 1.0*pos/n/2*2#dividing by 2 accounts for the fact that RC not accounted for
                 #From the best RE, search the positive sequence set and generate a starting PWM
-                print 'Generating starting point from subsequences'
-                theta_motif = generate_starting_point(best_word, pos_seqs, W)
+                #print 'Generating starting point from subsequences'
+                #theta_motif = generate_starting_point(best_word, pos_seqs, W)
                 #theta_motif = load('NRSF_test.npy')
                 theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
                 theta_motif, theta_background_matrix, lambda_motif, fractions, distances = Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif)
                 if lambda_motif > 10.0*len(Y)/n:
                     print 'Fraction is too high. Setting log E-value to max value'
                     print 'Motif E-value exceeded threshold. Trying again...'
+                    #save the failed result
+                    logev = BIGLOG
+                    all_logevs.append(logev)
+                    all_lambda_motifs.append(lambda_motif)
+                    all_theta_motifs.append(theta_motif)
+                    all_theta_background_matrices.append(theta_background_matrix)
+                    all_fractionses.append(fractions)
+                    all_distanceses.append(distances)
                     continue
                 if lambda_motif < 10.0/n:
                     print 'Fraction is too low. Setting log E-value to max value'
                     print 'Motif E-value exceeded threshold. Trying again...'
+                    #save the failed result
+                    logev = BIGLOG
+                    all_logevs.append(logev)
+                    all_lambda_motifs.append(lambda_motif)
+                    all_theta_motifs.append(theta_motif)
+                    all_theta_background_matrices.append(theta_background_matrix)
+                    all_fractionses.append(fractions)
+                    all_distanceses.append(distances)
                     continue
                 print 'Finding number of motif sites'
                 nsites_dis = get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is)
