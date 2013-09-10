@@ -6,6 +6,18 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+9/9/13:
+Oh wow, I've been gone a long time. New goal: Generate multiple motif discovery in NRSE in DM3 DNase-Seq.
+Maybe get rid of trimming for now. Moved shuffling. For comparison to MEME, just show simulation data
+and how the time differences diverge very quickly. Running all codes on cbcl-a32.
+
+This is the command I used for testing MEME on simulated data:
+
+time meme -mod anr -o Simul_500_meme -w 23 -nmotifs 1 -maxsites 500 -dna -revcomp -maxsize 50000 Simul_500.fasta
+
+Searching for 1 motif of the NRSF motif at width 23 (true width 21). Max sites set to number of sequences.
+Reverse complement. Max size set to number of residues.
+
 8/22/13:
 Wrote generate_starting_points to generate a list of starting points that are iterated through. For each
 valid core motif hit, it returns a centered starting point and an off-centered starting point (5'

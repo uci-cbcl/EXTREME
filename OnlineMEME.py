@@ -240,7 +240,8 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
     pwms_sum = zeros((W,4))#should be deleted
     backgrounds_sum = zeros((W,4))#should be deleted
     #shuffle the seqindpairs
-    random.shuffle(seqindpairs)
+    #as of 9/9/13, removed shuffling in this function. Use same ordering for same width
+    #random.shuffle(seqindpairs)
     #reserve some memory. this was when each sequence had only one subsequence
     """fractions = zeros(N)
     pwms = zeros((N,W,4))
@@ -255,8 +256,8 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
     firstmotif = theta_motif#for tracking how much the motif changes
     mu = theta_background_matrix#the first background matrix is the average frequencies in the negative set
     Bmu = B*mu#the priors to be added each step
-    g0 = lambda_motif*30;
-    print g0
+    g0 = lambda_motif*20;
+    print "Initial step size of " + str(g0)
     print "Running Online EM algorithm..."
     for seqindpair in seqindpairs:#iterate through each sequence index and start pair
         seqind = seqindpair[0]
@@ -656,19 +657,28 @@ def generate_starting_points(core_re, pos_seqs, W, tries, given_only=False):
             extra = W - padding - padding - core_width#just in case
             start1 = start - padding - extra
             end1 = end + padding
-            #for the off-centered padding
+            #for the left off-centered padding
             total_padding = W - core_width
             left_padding = total_padding*3/4
             right_padding = total_padding*1/4
             extra = W - left_padding - right_padding - core_width#just in case
             start2 = start - left_padding - extra
             end2 = end + right_padding
-            if start1 >= 0 and end1 <= L and start2 >= 0 and end2 <= L:#check if starting point is actually inside sequence
+            #for the right off-centered padding, recycling variables from above
+            start3 = start - right_padding
+            end3 = end + left_padding + extra
+            if start1 >= 0 and end1 <= L and start2 >= 0 and end2 <= L and start3 >= 0 and end3 <= L:#check if starting point is actually inside sequence
                 b = s[start1:end1]
                 c = s[start2:end2]
-                if 'N' not in b and 'N' not in c:#no deleted sequences please
+                d = s[start3:end3]
+                if 'N' not in b and 'N' not in c and 'N' not in d:#no deleted sequences please
+                    print "Generating starting point from subsequences:"
+                    print b
+                    print c
+                    print d
                     starting_points.append(startingPoint(sequenceToI(b), m))
                     starting_points.append(startingPoint(sequenceToI(c), m))
+                    starting_points.append(startingPoint(sequenceToI(d), m))
                     tries -= 1
                     if tries == 0:
                         break
@@ -741,6 +751,7 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,revcomp=True):
             seqindpairs = [[(seqind,subseqind) for subseqind in xrange(len(Is[seqind])) if Is[seqind][subseqind] is not None] for seqind in xrange(len(Is))]
             seqindpairs = list(chain(*seqindpairs))
             n = len(seqindpairs)#total number of subsequences
+            random.shuffle(seqindpairs)
             print 'Generating starting points from subsequences'
             starting_points = generate_starting_points(best_word, pos_seqs, W, tries)
             #for t in range(tries):#right now NPASSES is number of tries per width
@@ -799,11 +810,12 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,revcomp=True):
                     mm.calc_ent()
                     logev = mm.get_logev()
                     print 'Log E-value: ' + str(logev)
-                    rentropy = mm.get_rentropy()
+                    #as of 9/9/13, removed trimming
+                    #rentropy = mm.get_rentropy()
                     #trim PWM
-                    theta_motif = trim_PWM(theta_motif, rentropy, rthresh)
+                    #theta_motif = trim_PWM(theta_motif, rentropy, rthresh)
                     #trim the background matrix to same size
-                    theta_background_matrix = theta_background_matrix[0:theta_motif.shape[0],:]
+                    #theta_background_matrix = theta_background_matrix[0:theta_motif.shape[0],:]
                 if logev < log_ethresh:#if valid motif, save it
                     print 'Motif E-value less than threshold. Saving...'
                     logevs.append(logev)
@@ -831,6 +843,7 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,revcomp=True):
         best_fractions = fractionses[best_index]
         best_distances = distanceses[best_index]
         best_logev = logevs[best_index]
+        print "Using PWM with log EV: " + str(best_logev)
         discovered_lambda_motifs.append(best_lambda_motif)
         discovered_theta_motifs.append(best_theta_motif)
         discovered_theta_background_matrices.append(best_theta_background_matrix)
@@ -1002,7 +1015,7 @@ k - the motif number index
 outstr - the prefix for the output files
 """
 def outputMotif(theta_motif, theta_background_matrix, lambda_motif, fractions, distances, logev, k, outstr):
-    from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, unambiguous_dna_alphabet
+    from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, eps_formatter, unambiguous_dna_alphabet
     _pv_format = "%3.1fe%+04.0f"
     f_string = dre.sprint_logx(log(lambda_motif), 1, _pv_format)
     g_string = dre.sprint_logx(logev, 1, _pv_format)
@@ -1015,6 +1028,10 @@ def outputMotif(theta_motif, theta_background_matrix, lambda_motif, fractions, d
     forma = LogoFormat(data, options)
     fout = open(outstr + "Motif_" + str(k) + '.png', 'w')
     png_formatter(data, forma, fout)
+    fout.close()
+    print 'Saving motif as an eps...'
+    fout = open(outstr + "Motif_" + str(k) + '.eps', 'w')
+    eps_formatter(data, forma, fout)
     fout.close()
     print 'Saving fractions list'
     save(outstr + "Fractions_" + str(k), fractions)

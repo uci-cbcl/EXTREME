@@ -69,8 +69,8 @@ def makeFASTA(fastafilename, bg, pwms, fracsMotif, l, n):
     pwms.insert(0,None)#background acts as a the first pseudo pwm, so no motif first
     pwmiters = [repeat(pwm, freq) for pwm, freq in zip(pwms, freqsMotif)]#a list of iterables for sequence generation
     pwmchain = chain(*pwmiters)
-    l = sum(freqsMotif)
-    frags = [SeqRecord(Seq(genseq(bg,pwm,mu=l),IUPAC.ambiguous_dna),'fragment_%i' % (i+1),'','') for pwm, i in izip(pwmchain,xrange(l))]
+    #l = sum(freqsMotif)
+    frags = [SeqRecord(Seq(genseq(bg,pwm,mu=l),IUPAC.ambiguous_dna),'fragment_%i' % (i+1),'','') for pwm, i in izip(pwmchain,xrange(n))]
     #I just want to avoid for loops. Generate all seqrecords to be written to file
     SeqIO.write(frags, output_handle, "fasta")
     output_handle.close()
