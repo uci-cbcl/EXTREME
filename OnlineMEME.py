@@ -225,7 +225,7 @@ theta_motif, motif PWM matrix
 theta_background_matrix, background PWM matrix
 lambda_motif, motif frequency
 """
-def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, B=0.1, smoothing=False, revcomp=True):
+def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, B=0.0001, smoothing=False, revcomp=True):
     W = theta_motif.shape[0]#get the length of the motif
     s1_1 = lambda_motif#the expected number of occurrences of the motif
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
@@ -248,15 +248,16 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
     backgrounds = zeros((N,4))
     """
     #prepare lists because we don't know how many subsequences we have in total
-    fractions = [None]*len(seqindpairs)#pre-allocate space
-    distances = [None]*len(seqindpairs)#pre-allocate space
+    fractions = [None]#*len(seqindpairs)#pre-allocate space
+    distances = [None]#*len(seqindpairs)#pre-allocate space
     #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
     #p = Pool(20)
     #truemotif = load('PWM_29_correct.npy')
     firstmotif = theta_motif#for tracking how much the motif changes
     mu = theta_background_matrix#the first background matrix is the average frequencies in the negative set
     Bmu = B*mu#the priors to be added each step
-    g0 = lambda_motif*20;
+    #9/10/13 was *20, now *10
+    g0 = lambda_motif*10;
     print "Initial step size of " + str(g0)
     print "Running Online EM algorithm..."
     for seqindpair in seqindpairs:#iterate through each sequence index and start pair
@@ -300,6 +301,7 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
                     Z = Zr
                     I = Ir
             ds1_1 = Z
+        I = I + Bmu
         ds1_2 = ds1_1*I
         ds2_2 = (1-ds1_1)*I
         s1_1 = s1_1 + step*(ds1_1 - s1_1)
@@ -311,9 +313,12 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
         theta_motif = s1_2# + step*Bmu
         theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
         #correct the PWM so that no frequency is too big or small
+        #9/10/13 Removed these steps
+        """
         theta_motif[theta_motif>0.97] = 0.97
         theta_motif[theta_motif<0.01] = 0.01
         theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
+        """
         theta_background = s2_2.sum(axis = 0)#collapse the expected background counts into a single array
         theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
         theta_background = array([theta_background])#prepare background for repeat
@@ -326,8 +331,8 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
             pwms_sum = pwms_sum + theta_motif
             backgrounds_sum = backgrounds_sum + theta_background_matrix
         """
-        fractions[n] = lambda_motif
-        distances[n] = dist(theta_motif,firstmotif)
+        #fractions[n] = lambda_motif
+        #distances[n] = dist(theta_motif,firstmotif)
             #pwms.append(theta_motif)
             #backgrounds.append(theta_background)
             #if n > nstart, then start using averaged parameters for the upcoming E-step
@@ -836,6 +841,11 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,revcomp=True):
                 all_distanceses.append(distances)
             W = int(round(W*sqrt(2)))
         #went through all widths, now pick motif with best E-value
+        #if no valid motif found, then exit
+        if len(logevs) == 0:
+            print 'No motif found, so just deleting core binding site...'
+            dre.erase_re(best_word, pos_seqs, neg_seqs)
+            continue
         best_index = argmin(logevs)
         best_theta_motif = theta_motifs[best_index]
         best_theta_background_matrix = theta_background_matrices[best_index]
@@ -852,10 +862,11 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,revcomp=True):
         discovered_logevs.append(best_logev)
         #erase motif sites from positive and negative sequences
         erase_motif(best_theta_motif, best_theta_background_matrix, best_lambda_motif, pos_seqs, neg_seqs)
-    (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
-            find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
-    print str(pos) + ' positive sites'
-    print str(neg) + ' negative sites'
+    #9/10/13 Removed the extra DREME step for timing purposes
+    #(best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
+    #        find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
+    #print str(pos) + ' positive sites'
+    #print str(neg) + ' negative sites'
     #return discovered_theta_motifs, discovered_theta_background_matrices, discovered_lambda_motifs, \
     #    discovered_fractionses, discovered_distanceses, discovered_logevs
     return all_theta_motifs, all_theta_background_matrices, all_lambda_motifs, \

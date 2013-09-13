@@ -6,6 +6,22 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+9/11/13:
+Ran an NRSF_Pub2 job. This one is meant to be fast. Removed trimming, distances, fractions.
+Added real pseudocounts. Used the masked reference genome. Only finding motifs of size 35.
+Look for three motifs. Multiply by 10 to g0. Wow, the masked version works very well. Lost
+about 400 canonical binding sites. Canonical binding works pretty much 100% of the time at
+W=35. Will try again for time 15 g0 (Pub3) and time 20 (Pub4) and time 12.5 (Pub5). Pub2 
+found 2 different non-canonical binding sites with slightly different half distances.
+
+Trying it again for S2 (masked, STARR only) at m=1, minw=16, maxw=33 (S2_Pub2 time 10 g0, S2_Pub3 time 15 g0,
+S2_Pub4 time 20 g0).
+
+Changed the lines with fractions and distances list. No preallocating space anymore.
+
+9/10/13:
+Got timing. It's pretty much linear. Took out multiple tries. Added actual pseudo.
+
 9/9/13:
 Oh wow, I've been gone a long time. New goal: Generate multiple motif discovery in NRSE in DM3 DNase-Seq.
 Maybe get rid of trimming for now. Moved shuffling. For comparison to MEME, just show simulation data
