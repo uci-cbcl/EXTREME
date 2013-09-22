@@ -892,7 +892,7 @@ def refine_from_re(re_pvalues, re, nref, pos_seqs, neg_seqs, given_only):
     # Try to specialize the RE by removing all letters that don't
     # occur in any positive matches.
     #
-    new_re = specialize_using_consensus(re, pos_seqs)
+    pwm, new_re = specialize_using_consensus(re, pos_seqs, given_only)
     if new_re != re:
         "Improved RE by removing letters not appearing in positive matches."
     re = new_re
@@ -931,7 +931,7 @@ def get_consensus_from_re(re, seqs, given_only):
     """
 
     # Convert REs to consensus strings and create combined consensus string.
-    (pwm, nsites) = make_pwm_from_re(re, seqs, given_only=given_only)
+    pwm = make_pwm_from_re(re, seqs, given_only=given_only)
     return pwm.consensus_sequence()
 
 
@@ -951,14 +951,14 @@ def specialize_using_consensus(re, seqs, given_only):
 
     new_re = ""
     inverse_map = inverse_dna_ambig_mapping()
-    (pwm, nsites) = make_pwm_from_re(re, seqs, given_only=given_only)
+    pwm = make_pwm_from_re(re, seqs, pseudo_count=0.69, given_only=given_only)
     consensus = pwm.consensus()
     for matches in consensus:
         matches.sort()
         ambig = "".join(matches)
         new_re += inverse_map[ambig]
 
-    return new_re
+    return pwm, new_re
 
 
 def re_refine_all(re_pvalues, candidate_pvalues, nref, allowed_letters, pos_seqs, neg_seqs, hamming_dist=-1, given_only=False):

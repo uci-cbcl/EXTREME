@@ -776,12 +776,24 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,fudgefactor=1.0,revcomp=Tr
         logevs = list()
         #Use DREME to find a core seed
         (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
-            find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
+            find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs,minw=Wmin,maxw=Wmax)
         print str(pos) + ' positive sites'
         print str(neg) + ' negative sites'
         W = Wmin
+        print 'A PWM made from the best RE:'
+        DQ = array(dre.make_pwm_from_re(best_word, pos_seqs, pseudo_count=max(1.0*neg,1.0)).getFreq())
+        print DQ
+        if DQ.shape[0] < Wmin:
+            print 'PWM is too short. Padding both sides with background frequencies'
+            # Pad RE out to maxw evenly on both sides.
+            pad = Wmin - DQ.shape[0]
+            left_pad = pad/2
+            right_pad = pad - left_pad
+            DQ = concatenate((theta_background.repeat(left_pad,axis=0),DQ,theta_background.repeat(right_pad,axis=0)))
+        Wmax = W
         while W <= Wmax:
             print 'Using starting point from DREME PWM generation...'
+            starting_points = [DQ]
             #n = sum([max(0,len(y) - W + 1) for y in Y])#gets number of subsequences
             X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
             #subsequences are grouped by sequences for normalization purposes
@@ -792,8 +804,8 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,fudgefactor=1.0,revcomp=Tr
             seqindpairs = list(chain(*seqindpairs))
             n = len(seqindpairs)#total number of subsequences
             random.shuffle(seqindpairs)
-            print 'Generating starting points from subsequences'
-            starting_points = generate_starting_points(best_word, pos_seqs, W, tries)
+            #print 'Generating starting points from subsequences'
+            #starting_points = generate_starting_points(best_word, pos_seqs, W, tries)
             #for t in range(tries):#right now NPASSES is number of tries per width
             t = 0
             for theta_motif in starting_points:
@@ -810,7 +822,6 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,fudgefactor=1.0,revcomp=Tr
                 #theta_motif = load('NRSF_test.npy')
                 theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
                 theta_motif, theta_background_matrix, lambda_motif, fractions, distances = Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor)
-                print theta_motif
                 if lambda_motif > 10.0*len(Y)/n:
                     print 'Fraction is too high. Setting log E-value to max value'
                     print 'Motif E-value exceeded threshold. Trying again...'

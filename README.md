@@ -6,6 +6,17 @@ An Online implementation of the MEME algorithm
 -----
 Notes
 -----
+9/20/13:
+Used DREME extension feature for generating starting points. It's good for NANOG and CTCF, but has trouble finding weaker co-factors.
+Made a second copy of the program specifically designed for short mers. Must refine it for use with Footprints.
+
+9/19/13:
+Fudge factors are awesome for short mers.
+
+9/18/13:
+Using simulated data, I can safely assume that the initial counts do not affect the 
+final counts. The "second term" is much more important than the "first term".
+
 9/11/13:
 Ran an NRSF_Pub2 job. This one is meant to be fast. Removed trimming, distances, fractions.
 Added real pseudocounts. Used the masked reference genome. Only finding motifs of size 35.
