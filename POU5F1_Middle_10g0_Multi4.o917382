@@ -1,0 +1,2971 @@
+Started at:
+Mon Sep 16 13:23:29 2013
+Grabbing middle sequences...
+Shuffling positive sequences...
+Counting positive sequences with each word...
+Counting negative sequences with each word...
+Applying Fisher Exact Test to 31594 words...
+Generalizing top 100 of 31594 REs to 1 ambiguous characters...
+Generalizing top 100 of 352 REs to 2 ambiguous characters...
+Generalizing top 25 of 25 REs to 3 ambiguous characters...
+Computing exact p-values for 100 REs...
+Best RE was CATRABAA TTVTYATG p-value= 1.3e-063 E-value= 4.3e-059 Unerased_E-value= 4.3e-059
+267 positive sites
+19 negative sites
+Generating starting points from subsequences
+Generating starting point from subsequences:
+GAAATCTGCATGATAAAAGTTTC
+AAGGGAAATCTGCATGATAAAAG
+CTGCATGATAAAAGTTTCCTGCT
+Generating starting point from subsequences:
+CCTGTTCATTGTCATGCAGATAT
+CATTCCTGTTCATTGTCATGCAG
+TCATTGTCATGCAGATATTTGTC
+Generating starting point from subsequences:
+AAACCTCATTGTCATGCATAGAT
+ATGCAAACCTCATTGTCATGCAT
+TCATTGTCATGCATAGATTTTAA
+Generating starting point from subsequences:
+TACTTATGCATGACAAAGAATGA
+CTTTTACTTATGCATGACAAAGA
+ATGCATGACAAAGAATGAAAGCC
+Generating starting point from subsequences:
+TGTTTCTGCATGACAAATGGTAG
+GTCCTGTTTCTGCATGACAAATG
+CTGCATGACAAATGGTAGCAAAA
+Generating starting point from subsequences:
+GGCAGCCTTTCTTATGCAGGAGC
+TGCTGGCAGCCTTTCTTATGCAG
+CCTTTCTTATGCAGGAGCCCTTC
+Generating starting point from subsequences:
+TCAGCATGCATAACAAAGCAGCC
+AACCTCAGCATGCATAACAAAGC
+ATGCATAACAAAGCAGCCCGCGG
+Generating starting point from subsequences:
+CCTTGTCATTCTCATGTAAATTG
+TTCGCCTTGTCATTCTCATGTAA
+TCATTCTCATGTAAATTGCAATT
+Generating starting point from subsequences:
+AGTTGGTGCATGACAATAAAAGC
+TCACAGTTGGTGCATGACAATAA
+GTGCATGACAATAAAAGCTGATT
+Generating starting point from subsequences:
+TGAGAATATTCTTATGCTAAAGG
+ATGTTGAGAATATTCTTATGCTA
+ATATTCTTATGCTAAAGGCTTTC
+Try 1 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 3546 sites
+Calculating log E-value
+Log E-value: 11004.1550658
+Motif E-value exceeded threshold. Trying again...
+Try 2 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 1901 sites
+Calculating log E-value
+Log E-value: 3248.68999988
+Motif E-value exceeded threshold. Trying again...
+Try 3 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 664 sites
+Calculating log E-value
+Log E-value: -594.836860372
+Motif E-value less than threshold. Saving...
+Try 4 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 2642 sites
+Calculating log E-value
+Log E-value: 6762.72051846
+Motif E-value exceeded threshold. Trying again...
+Try 5 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 629 sites
+Calculating log E-value
+Log E-value: -705.993211661
+Motif E-value less than threshold. Saving...
+Try 6 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 2240 sites
+Calculating log E-value
+Log E-value: 4872.37815849
+Motif E-value exceeded threshold. Trying again...
+Try 7 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 1369 sites
+Calculating log E-value
+Log E-value: 1188.8609196
+Motif E-value exceeded threshold. Trying again...
+Try 8 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 629 sites
+Calculating log E-value
+Log E-value: -703.3812556
+Motif E-value less than threshold. Saving...
+Try 9 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 2269 sites
+Calculating log E-value
+Log E-value: 5033.32220663
+Motif E-value exceeded threshold. Trying again...
+Try 10 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 3553 sites
+Calculating log E-value
+Log E-value: 11015.9130967
+Motif E-value exceeded threshold. Trying again...
+Try 11 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 3405 sites
+Calculating log E-value
+Log E-value: 11932.9474766
+Motif E-value exceeded threshold. Trying again...
+Try 12 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 796 sites
+Calculating log E-value
+Log E-value: -129.205071346
+Motif E-value less than threshold. Saving...
+Try 13 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 3405 sites
+Calculating log E-value
+Log E-value: 10159.106259
+Motif E-value exceeded threshold. Trying again...
+Try 14 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 2867 sites
+Calculating log E-value
+Log E-value: 8127.54612838
+Motif E-value exceeded threshold. Trying again...
+Try 15 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 1469 sites
+Calculating log E-value
+Log E-value: 2321.5557354
+Motif E-value exceeded threshold. Trying again...
+Try 16 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 1721 sites
+Calculating log E-value
+Log E-value: 2545.68550028
+Motif E-value exceeded threshold. Trying again...
+Try 17 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 992 sites
+Calculating log E-value
+Log E-value: 454.203334519
+Motif E-value exceeded threshold. Trying again...
+Try 18 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 2357 sites
+Calculating log E-value
+Log E-value: 5472.74839716
+Motif E-value exceeded threshold. Trying again...
+Try 19 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 3101 sites
+Calculating log E-value
+Log E-value: 8554.83548796
+Motif E-value exceeded threshold. Trying again...
+Try 20 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 2036 sites
+Calculating log E-value
+Log E-value: 3849.29428394
+Motif E-value exceeded threshold. Trying again...
+Try 21 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 969 sites
+Calculating log E-value
+Log E-value: 355.166154657
+Motif E-value exceeded threshold. Trying again...
+Try 22 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 4183 sites
+Calculating log E-value
+Log E-value: 14199.6349548
+Motif E-value exceeded threshold. Trying again...
+Try 23 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 1824 sites
+Calculating log E-value
+Log E-value: 3603.85338768
+Motif E-value exceeded threshold. Trying again...
+Try 24 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 4119 sites
+Calculating log E-value
+Log E-value: 14058.9412009
+Motif E-value exceeded threshold. Trying again...
+Try 25 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 3173 sites
+Calculating log E-value
+Log E-value: 8917.41775777
+Motif E-value exceeded threshold. Trying again...
+Try 26 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 1779 sites
+Calculating log E-value
+Log E-value: 2731.750237
+Motif E-value exceeded threshold. Trying again...
+Try 27 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 721 sites
+Calculating log E-value
+Log E-value: -421.396161273
+Motif E-value less than threshold. Saving...
+Try 28 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 3265 sites
+Calculating log E-value
+Log E-value: 9843.06427992
+Motif E-value exceeded threshold. Trying again...
+Try 29 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 597 sites
+Calculating log E-value
+Log E-value: -856.011809987
+Motif E-value less than threshold. Saving...
+Try 30 for width 23
+Initial step size of 0.103440260344
+Running Online EM algorithm...
+Finding number of motif sites
+Found 2712 sites
+Calculating log E-value
+Log E-value: 7304.59292641
+Motif E-value exceeded threshold. Trying again...
+Generating starting points from subsequences
+Generating starting point from subsequences:
+CTTTCCCGTTTAGCATAACAATGGAACCTTCGT
+TCTCCACTTTCCCGTTTAGCATAACAATGGAAC
+GTTTAGCATAACAATGGAACCTTCGTGAGCCGC
+Generating starting point from subsequences:
+CTGAATGAGCTCATTGTCATGTAATTTAATAGG
+GGCTGACTGAATGAGCTCATTGTCATGTAATTT
+AGCTCATTGTCATGTAATTTAATAGGAGCCAGG
+Generating starting point from subsequences:
+CTCCCTGCGATTGCATAACAAAAGTGTCTAAAT
+CAACTCCTCCCTGCGATTGCATAACAAAAGTGT
+CGATTGCATAACAAAAGTGTCTAAATTCACACC
+Generating starting point from subsequences:
+ATCACAGTTGGTGCATGACAATAAAAGCTGATT
+ATTCTAATCACAGTTGGTGCATGACAATAAAAG
+TTGGTGCATGACAATAAAAGCTGATTACTCTCC
+Generating starting point from subsequences:
+CCCAAAGGCATCGCATAACAATTGTGATCTCCC
+GATGAGCCCAAAGGCATCGCATAACAATTGTGA
+GCATCGCATAACAATTGTGATCTCCCAGCTGGA
+Generating starting point from subsequences:
+CTACCTTTCATCATTGTTATGCAGAAAAGGATC
+CTTAGGCTACCTTTCATCATTGTTATGCAGAAA
+TCATCATTGTTATGCAGAAAAGGATCTCCAGAG
+Generating starting point from subsequences:
+CTTTCTTCTTTCTTTCTTATGGAAAATAACTAT
+CTCTCTCTTTCTTCTTTCTTTCTTATGGAAAAT
+CTTTCTTTCTTATGGAAAATAACTATCTTCCTG
+Generating starting point from subsequences:
+TCCTGTGTTCCTGCATAACAATAGCTGATAGTT
+TTGTACTCCTGTGTTCCTGCATAACAATAGCTG
+TTCCTGCATAACAATAGCTGATAGTTCCTGCTC
+Generating starting point from subsequences:
+GCGTGGGAAACCTTTGTCATGCAGATCCTGCTG
+AGGAGAGCGTGGGAAACCTTTGTCATGCAGATC
+AAACCTTTGTCATGCAGATCCTGCTGCCTGTTT
+Generating starting point from subsequences:
+GCAGCAAATTTAGCATGACAAAGTTGCTCCCAT
+TCACAGGCAGCAAATTTAGCATGACAAAGTTGC
+ATTTAGCATGACAAAGTTGCTCCCATTTTGCAA
+Try 1 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 2 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 3 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 4 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 5 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 6 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 7 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 8 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 9 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 10 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 11 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 12 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 13 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 14 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 15 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 16 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 17 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 18 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 19 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 20 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 21 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 22 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 23 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 24 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 25 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 26 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 27 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 28 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 29 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 30 for width 33
+Initial step size of 0.120143091772
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Using PWM with log EV: -856.011809987
+Erasing motif from positive sequences
+Erased 509 sites from the positive sequences
+Erasing motif from negative sequences
+Erased 107 sites from the negative sequences
+Counting positive sequences with each word...
+Counting negative sequences with each word...
+Applying Fisher Exact Test to 29968 words...
+Generalizing top 100 of 29968 REs to 1 ambiguous characters...
+Generalizing top 35 of 35 REs to 2 ambiguous characters...
+Generalizing top 1 of 1 REs to 3 ambiguous characters...
+Computing exact p-values for 36 REs...
+Best RE was WTATGCR YGCATAW p-value= 2.1e-011 E-value= 6.4e-007 Unerased_E-value= 1.4e-037
+83 positive sites
+19 negative sites
+Generating starting points from subsequences
+Generating starting point from subsequences:
+TATTTGCGTTATGCGCATACTGA
+CACCTATTTGCGTTATGCGCATA
+TGCGTTATGCGCATACTGAGAAA
+Generating starting point from subsequences:
+AACTGCGTATATGCGCATACATA
+GCCAAACTGCGTATATGCGCATA
+GCGTATATGCGCATACATACTCT
+Generating starting point from subsequences:
+AAACAAAAATATGCAAATTAACA
+ACTGAAACAAAAATATGCAAATT
+AAAAATATGCAAATTAACACCTC
+Generating starting point from subsequences:
+ACAATGCTATATGCGCATTTGAT
+ATACACAATGCTATATGCGCATT
+TGCTATATGCGCATTTGATGAGC
+Generating starting point from subsequences:
+AAAAACCATGCATATTCTCTAAG
+GAAGAAAAACCATGCATATTCTC
+ACCATGCATATTCTCTAAGCTTT
+Generating starting point from subsequences:
+TGACTATGCGCATATTCAGCCCT
+GATGTGACTATGCGCATATTCAG
+TATGCGCATATTCAGCCCTTGGG
+Generating starting point from subsequences:
+CAAATGGTTGCATAATTTATGTA
+CACACAAATGGTTGCATAATTTA
+TGGTTGCATAATTTATGTAGATA
+Generating starting point from subsequences:
+ACCAGAATATATGCGCATGGTGC
+GAGAACCAGAATATATGCGCATG
+GAATATATGCGCATGGTGCCTCA
+Generating starting point from subsequences:
+AATTGCAATTATGCGCATTAACA
+CCATAATTGCAATTATGCGCATT
+GCAATTATGCGCATTAACAGTCC
+Generating starting point from subsequences:
+GAGACATGCGCATATTTAACAGG
+TGTGGAGACATGCGCATATTTAA
+CATGCGCATATTTAACAGGAGAC
+Try 1 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 2 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 3 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 4 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 70 sites
+Calculating log E-value
+Log E-value: -98.4252021032
+Motif E-value less than threshold. Saving...
+Try 5 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 44 sites
+Calculating log E-value
+Log E-value: -43.0963599469
+Motif E-value less than threshold. Saving...
+Try 6 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 45 sites
+Calculating log E-value
+Log E-value: -96.6778893315
+Motif E-value less than threshold. Saving...
+Try 7 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 13 sites
+Calculating log E-value
+Log E-value: 4.09587044765
+Motif E-value exceeded threshold. Trying again...
+Try 8 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 9 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 19 sites
+Calculating log E-value
+Log E-value: 23.552808767
+Motif E-value exceeded threshold. Trying again...
+Try 10 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 11 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 12 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 13 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 14 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 12 sites
+Calculating log E-value
+Log E-value: 2.61574451591
+Motif E-value exceeded threshold. Trying again...
+Try 15 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 14 sites
+Calculating log E-value
+Log E-value: 16.7398978483
+Motif E-value exceeded threshold. Trying again...
+Try 16 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 46 sites
+Calculating log E-value
+Log E-value: -12.9790791485
+Motif E-value less than threshold. Saving...
+Try 17 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 63 sites
+Calculating log E-value
+Log E-value: -26.9885776664
+Motif E-value less than threshold. Saving...
+Try 18 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 34 sites
+Calculating log E-value
+Log E-value: -22.958024415
+Motif E-value less than threshold. Saving...
+Try 19 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 20 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 21 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 22 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 23 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 30 sites
+Calculating log E-value
+Log E-value: -10.2651037679
+Motif E-value less than threshold. Saving...
+Try 24 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 20 sites
+Calculating log E-value
+Log E-value: -5.86887314213
+Motif E-value less than threshold. Saving...
+Try 25 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 49 sites
+Calculating log E-value
+Log E-value: -73.6521746287
+Motif E-value less than threshold. Saving...
+Try 26 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 38 sites
+Calculating log E-value
+Log E-value: -10.0143195497
+Motif E-value less than threshold. Saving...
+Try 27 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 14 sites
+Calculating log E-value
+Log E-value: 1.58644574789
+Motif E-value exceeded threshold. Trying again...
+Try 28 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 34 sites
+Calculating log E-value
+Log E-value: -32.2735533529
+Motif E-value less than threshold. Saving...
+Try 29 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 73 sites
+Calculating log E-value
+Log E-value: -16.5835882534
+Motif E-value less than threshold. Saving...
+Try 30 for width 23
+Initial step size of 0.0513884159366
+Running Online EM algorithm...
+Finding number of motif sites
+Found 27 sites
+Calculating log E-value
+Log E-value: -33.158098293
+Motif E-value less than threshold. Saving...
+Generating starting points from subsequences
+Generating starting point from subsequences:
+TCCCTAATTGGTTATATGCGCATATATTAAATG
+ACATTTTTCCCTAATTGGTTATATGCGCATATA
+TTGGTTATATGCGCATATATTAAATGACCAGGC
+Generating starting point from subsequences:
+TGTCTAGGGTATGCGCATATGCTGCGTTTTTCC
+ACGTCTGTGTCTAGGGTATGCGCATATGCTGCG
+GGTATGCGCATATGCTGCGTTTTTCCGCAGGTG
+Generating starting point from subsequences:
+AATGTTTCTTTCAATATGCATCCAGATTCACAT
+AAGAACTAATGTTTCTTTCAATATGCATCCAGA
+CTTTCAATATGCATCCAGATTCACATAAGTACC
+Generating starting point from subsequences:
+GGGATGCTTACTATGCATATCTCTATCACGACT
+CGTTGTGGGGATGCTTACTATGCATATCTCTAT
+TTACTATGCATATCTCTATCACGACTAAGCCAA
+Generating starting point from subsequences:
+CTCCTGCTGTGTTTGCATAAAGACACTGGAAGG
+TGTATTTCTCCTGCTGTGTTTGCATAAAGACAC
+TGTGTTTGCATAAAGACACTGGAAGGACGCAGG
+Generating starting point from subsequences:
+ATGGCCATATATTTGCATAATGACTTGCTTTTT
+GCCTTGGATGGCCATATATTTGCATAATGACTT
+TATATTTGCATAATGACTTGCTTTTTGTTCCTT
+Generating starting point from subsequences:
+GAGCTGGGGCAGATTATGCAAAGGGCTGGGTTT
+TTATGGGGAGCTGGGGCAGATTATGCAAAGGGC
+GGCAGATTATGCAAAGGGCTGGGTTTCAGGGTG
+Generating starting point from subsequences:
+AGAACCAGGCCAAATATGCGCATGTGCCACTAA
+ACCCACCAGAACCAGGCCAAATATGCGCATGTG
+GGCCAAATATGCGCATGTGCCACTAACACTAAG
+Generating starting point from subsequences:
+TTCTTTTATCTGTATATGCATGGTTTGCCCTCA
+GATCTTTTTCTTTTATCTGTATATGCATGGTTT
+ATCTGTATATGCATGGTTTGCCCTCAGTGCTCC
+Generating starting point from subsequences:
+TGCATTAACCATCTGCATAATCTGCTCTTTAAA
+GTTAATCTGCATTAACCATCTGCATAATCTGCT
+ACCATCTGCATAATCTGCTCTTTAAAATAAAAA
+Try 1 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 2 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 3 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 4 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 5 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 6 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 7 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 8 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 9 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 10 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 11 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 12 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 13 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 14 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 15 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 16 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 17 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 18 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 19 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 20 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 21 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 22 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 23 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 24 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 25 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 26 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 27 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 28 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 29 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 30 for width 33
+Initial step size of 0.069212808539
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Using PWM with log EV: -98.4252021032
+Erasing motif from positive sequences
+Erased 41 sites from the positive sequences
+Erasing motif from negative sequences
+Erased 8 sites from the negative sequences
+Counting positive sequences with each word...
+Counting negative sequences with each word...
+Applying Fisher Exact Test to 29699 words...
+Generalizing top 100 of 29699 REs to 1 ambiguous characters...
+Generalizing top 14 of 14 REs to 2 ambiguous characters...
+Computing exact p-values for 14 REs...
+Best RE was ATAACAA TTGTTAT p-value= 4.1e-008 E-value= 1.2e-003 Unerased_E-value= 2.7e-028
+37 positive sites
+4 negative sites
+Generating starting points from subsequences
+Generating starting point from subsequences:
+GACTTGAAATAACAACACCCTCC
+AACTGACTTGAAATAACAACACC
+TGAAATAACAACACCCTCCTTGG
+Generating starting point from subsequences:
+TAGCACTTTTGTTATCTAAAGCT
+GATTTAGCACTTTTGTTATCTAA
+ACTTTTGTTATCTAAAGCTATTT
+Generating starting point from subsequences:
+GAAAAGAAATAACAACAACAGCA
+CAAAGAAAAGAAATAACAACAAC
+AGAAATAACAACAACAGCAGCCA
+Generating starting point from subsequences:
+GTCTTGTGTTGTTATTAATGTTT
+AAAGGTCTTGTGTTGTTATTAAT
+TGTGTTGTTATTAATGTTTTTGG
+Generating starting point from subsequences:
+AATCTCTTTTGTTATTTCCTCAC
+CATGAATCTCTTTTGTTATTTCC
+TCTTTTGTTATTTCCTCACCTAA
+Generating starting point from subsequences:
+AAAAGGTAATAACAAGCAGGCAA
+AGGCAAAAGGTAATAACAAGCAG
+GGTAATAACAAGCAGGCAACAGA
+Generating starting point from subsequences:
+CTGCTGATTTGTTATATTAGAAT
+TGATCTGCTGATTTGTTATATTA
+TGATTTGTTATATTAGAATTGCA
+Try 1 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 2 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 3 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 4 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 5 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 6 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 7 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Finding number of motif sites
+Found 9 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 8 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Finding number of motif sites
+Found 3 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 9 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 10 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 11 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Finding number of motif sites
+Found 3 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 12 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 13 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 14 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 15 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Finding number of motif sites
+Found 6 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 16 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 17 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 18 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 19 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 20 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 21 for width 23
+Initial step size of 0.0239777072128
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Generating starting points from subsequences
+Generating starting point from subsequences:
+GTGATCTGCTGATTTGTTATATTAGAATTGCAA
+TTGCCCAGTGATCTGCTGATTTGTTATATTAGA
+GCTGATTTGTTATATTAGAATTGCAAACAAATG
+Generating starting point from subsequences:
+ACAAAGAAAAGAAATAACAACAACAGCAGCCAC
+AGATCCAACAAAGAAAAGAAATAACAACAACAG
+AAAGAAATAACAACAACAGCAGCCACTCCTCCT
+Try 1 for width 33
+Initial step size of 0.032899124172
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 2 for width 33
+Initial step size of 0.032899124172
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 3 for width 33
+Initial step size of 0.032899124172
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 4 for width 33
+Initial step size of 0.032899124172
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 5 for width 33
+Initial step size of 0.032899124172
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 6 for width 33
+Initial step size of 0.032899124172
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+No motif found, so just deleting core binding site...
+Counting positive sequences with each word...
+Counting negative sequences with each word...
+Applying Fisher Exact Test to 29637 words...
+Generalizing top 100 of 29637 REs to 1 ambiguous characters...
+Generalizing top 10 of 10 REs to 2 ambiguous characters...
+Computing exact p-values for 10 REs...
+Best RE was CCRCAGG CCTGYGG p-value= 1.2e-006 E-value= 3.5e-002 Unerased_E-value= 6.4e-004
+36 positive sites
+6 negative sites
+Generating starting points from subsequences
+Generating starting point from subsequences:
+AGGTTTGTCCTGTGGGTATCAGT
+CTCTAGGTTTGTCCTGTGGGTAT
+TTGTCCTGTGGGTATCAGTGGCC
+Generating starting point from subsequences:
+ACTGAAAGCCTGTGGCAGCCTTT
+TTCCACTGAAAGCCTGTGGCAGC
+AAAGCCTGTGGCAGCCTTTGCTT
+Generating starting point from subsequences:
+GGATGTCTCCGCAGGGTGGCCTG
+CCTGGGATGTCTCCGCAGGGTGG
+GTCTCCGCAGGGTGGCCTGCTTT
+Generating starting point from subsequences:
+CATTTTCCCCACAGGCCCTGAGA
+ATTCCATTTTCCCCACAGGCCCT
+TTCCCCACAGGCCCTGAGACCCA
+Generating starting point from subsequences:
+CGTCAAAGCCTGCGGATTCTTCT
+GACCCGTCAAAGCCTGCGGATTC
+AAAGCCTGCGGATTCTTCTTTTA
+Generating starting point from subsequences:
+TCAGGATTCCACAGGCTTCTTTA
+TGCCTCAGGATTCCACAGGCTTC
+GATTCCACAGGCTTCTTTACCGC
+Generating starting point from subsequences:
+AGATTCTCCCACAGGCTACAGTT
+AGCCAGATTCTCCCACAGGCTAC
+TCTCCCACAGGCTACAGTTTTAA
+Generating starting point from subsequences:
+ACTGACTCCCTGTGGAATGAAAG
+CCCCACTGACTCCCTGTGGAATG
+ACTCCCTGTGGAATGAAAGGCAT
+Generating starting point from subsequences:
+CTTGCACTCCTGTGGTCCTCTCC
+AAGCCTTGCACTCCTGTGGTCCT
+CACTCCTGTGGTCCTCTCCAGTT
+Generating starting point from subsequences:
+GGCCTTCTCCGCAGGAGGCGCGG
+CAGGGGCCTTCTCCGCAGGAGGC
+TTCTCCGCAGGAGGCGCGGCAGC
+Try 1 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 2 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 3 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 4 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 6 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 5 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 8 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 6 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 6 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 7 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 8 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 9 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 9 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 10 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 4 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 11 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 4 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 12 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 5 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 13 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 14 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 15 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 16 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 8 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 17 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 9 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 18 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 19 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 20 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 5 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 21 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 22 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 23 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 3 sites
+Less than 10 sites discovered. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 24 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 25 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 26 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 27 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 28 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 12 sites
+Calculating log E-value
+Log E-value: -11.6683447703
+Motif E-value less than threshold. Saving...
+Try 29 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 17 sites
+Calculating log E-value
+Log E-value: -28.745988717
+Motif E-value less than threshold. Saving...
+Try 30 for width 23
+Initial step size of 0.0236725300016
+Running Online EM algorithm...
+Finding number of motif sites
+Found 11 sites
+Calculating log E-value
+Log E-value: -9.14097360296
+Motif E-value less than threshold. Saving...
+Generating starting points from subsequences
+Generating starting point from subsequences:
+TGCTACCGAGCTGCCTGTGGGGTCATGAATTAT
+TCCCAGCTGCTACCGAGCTGCCTGTGGGGTCAT
+GAGCTGCCTGTGGGGTCATGAATTATGCATGAG
+Generating starting point from subsequences:
+CGTGGTAAACGCTCCACAGGAAGCCGGGCTTCC
+GATAAAGCGTGGTAAACGCTCCACAGGAAGCCG
+AACGCTCCACAGGAAGCCGGGCTTCCAGGGCGG
+Generating starting point from subsequences:
+AAAGCCTTGCACTCCTGTGGTCCTCTCCAGTTG
+GAAAGAGAAAGCCTTGCACTCCTGTGGTCCTCT
+TGCACTCCTGTGGTCCTCTCCAGTTGATACATA
+Generating starting point from subsequences:
+TCCTGGGATGTCTCCGCAGGGTGGCCTGCTTTC
+AGACCCCTCCTGGGATGTCTCCGCAGGGTGGCC
+ATGTCTCCGCAGGGTGGCCTGCTTTCCTGCTCT
+Generating starting point from subsequences:
+CAGCCAATGGGCACCTGTGGGGAGTGTGGCGCT
+AGCCGCCCAGCCAATGGGCACCTGTGGGGAGTG
+TGGGCACCTGTGGGGAGTGTGGCGCTGTGTCCC
+Generating starting point from subsequences:
+ACAGGGGCCTTCTCCGCAGGAGGCGCGGCAGCG
+CTTCTTTACAGGGGCCTTCTCCGCAGGAGGCGC
+CCTTCTCCGCAGGAGGCGCGGCAGCGGGAGCGG
+Generating starting point from subsequences:
+GCTTCCTTAATCTCCACAGGAATCATTTCCCCT
+CTTTATTGCTTCCTTAATCTCCACAGGAATCAT
+TAATCTCCACAGGAATCATTTCCCCTTTTCTAT
+Generating starting point from subsequences:
+CTTCCACTGAAAGCCTGTGGCAGCCTTTGCTTC
+TGGTCAGCTTCCACTGAAAGCCTGTGGCAGCCT
+TGAAAGCCTGTGGCAGCCTTTGCTTCCAGCAAC
+Generating starting point from subsequences:
+GTGCCTCAGGATTCCACAGGCTTCTTTACCGCT
+CCTGCCGGTGCCTCAGGATTCCACAGGCTTCTT
+AGGATTCCACAGGCTTCTTTACCGCTGCCCCCC
+Try 1 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 2 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 3 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 4 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 5 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 6 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 7 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 8 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 9 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 10 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 11 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 12 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 13 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 14 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 15 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 16 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 17 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 18 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 19 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 20 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 21 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 22 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 23 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 24 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 25 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 26 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Try 27 for width 33
+Initial step size of 0.0325262016625
+Running Online EM algorithm...
+Fraction is too low. Setting log E-value to max value
+Motif E-value exceeded threshold. Trying again...
+Using PWM with log EV: -28.745988717
+Erasing motif from positive sequences
+Erased 16 sites from the positive sequences
+Erasing motif from negative sequences
+Erased 7 sites from the negative sequences
+Motif 1 had a fraction of 7.2e-002
+Motif 1 had an E-value of 1.1e+4779
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 2 had a fraction of 3.6e-002
+Motif 2 had an E-value of 7.7e+1410
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 3 had a fraction of 1.2e-002
+Motif 3 had an E-value of 4.6e-259
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 4 had a fraction of 4.8e-002
+Motif 4 had an E-value of 1.0e+2937
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 5 had a fraction of 1.1e-002
+Motif 5 had an E-value of 2.5e-307
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 6 had a fraction of 4.3e-002
+Motif 6 had an E-value of 1.1e+2116
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 7 had a fraction of 2.3e-002
+Motif 7 had an E-value of 2.1e+516
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 8 had a fraction of 1.1e-002
+Motif 8 had an E-value of 3.4e-306
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 9 had a fraction of 4.4e-002
+Motif 9 had an E-value of 8.8e+2185
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 10 had a fraction of 7.2e-002
+Motif 10 had an E-value of 1.4e+4784
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 11 had a fraction of 8.4e-002
+Motif 11 had an E-value of 2.6e+5182
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 12 had a fraction of 1.4e-002
+Motif 12 had an E-value of 7.7e-057
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 13 had a fraction of 6.7e-002
+Motif 13 had an E-value of 1.1e+4412
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 14 had a fraction of 6.0e-002
+Motif 14 had an E-value of 5.6e+3529
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 15 had a fraction of 2.7e-002
+Motif 15 had an E-value of 1.7e+1008
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 16 had a fraction of 2.9e-002
+Motif 16 had an E-value of 3.8e+1105
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 17 had a fraction of 1.8e-002
+Motif 17 had an E-value of 1.8e+197
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 18 had a fraction of 4.6e-002
+Motif 18 had an E-value of 6.1e+2376
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 19 had a fraction of 5.9e-002
+Motif 19 had an E-value of 2.1e+3715
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 20 had a fraction of 3.9e-002
+Motif 20 had an E-value of 5.3e+1671
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 21 had a fraction of 1.7e-002
+Motif 21 had an E-value of 1.8e+154
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 22 had a fraction of 8.5e-002
+Motif 22 had an E-value of 6.7e+6166
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 23 had a fraction of 3.3e-002
+Motif 23 had an E-value of 1.4e+1565
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 24 had a fraction of 8.8e-002
+Motif 24 had an E-value of 5.3e+6105
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 25 had a fraction of 6.1e-002
+Motif 25 had an E-value of 6.1e+3872
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 26 had a fraction of 3.4e-002
+Motif 26 had an E-value of 2.4e+1186
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 27 had a fraction of 1.3e-002
+Motif 27 had an E-value of 9.8e-184
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 28 had a fraction of 6.3e-002
+Motif 28 had an E-value of 6.1e+4274
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 29 had a fraction of 1.0e-002
+Motif 29 had an E-value of 1.7e-372
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 30 had a fraction of 5.5e-002
+Motif 30 had an E-value of 2.2e+3172
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 31 had a fraction of 1.5e-007
+Motif 31 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 32 had a fraction of 1.2e-008
+Motif 32 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 33 had a fraction of 6.7e-008
+Motif 33 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 34 had a fraction of 4.7e-008
+Motif 34 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 35 had a fraction of 1.2e-006
+Motif 35 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 36 had a fraction of 6.6e-007
+Motif 36 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 37 had a fraction of 2.0e-007
+Motif 37 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 38 had a fraction of 4.7e-008
+Motif 38 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 39 had a fraction of 3.3e-008
+Motif 39 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 40 had a fraction of 5.7e-008
+Motif 40 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 41 had a fraction of 3.2e-008
+Motif 41 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 42 had a fraction of 3.2e-005
+Motif 42 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 43 had a fraction of 2.0e-006
+Motif 43 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 44 had a fraction of 5.8e-009
+Motif 44 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 45 had a fraction of 6.7e-008
+Motif 45 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 46 had a fraction of 2.5e-008
+Motif 46 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 47 had a fraction of 5.1e-008
+Motif 47 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 48 had a fraction of 2.6e-008
+Motif 48 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 49 had a fraction of 3.9e-008
+Motif 49 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 50 had a fraction of 2.5e-006
+Motif 50 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 51 had a fraction of 1.9e-006
+Motif 51 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 52 had a fraction of 3.5e-009
+Motif 52 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 53 had a fraction of 5.4e-008
+Motif 53 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 54 had a fraction of 1.3e-008
+Motif 54 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 55 had a fraction of 1.9e-006
+Motif 55 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 56 had a fraction of 4.7e-007
+Motif 56 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 57 had a fraction of 1.0e-008
+Motif 57 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 58 had a fraction of 2.9e-008
+Motif 58 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 59 had a fraction of 1.8e-008
+Motif 59 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 60 had a fraction of 9.3e-007
+Motif 60 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 61 had a fraction of 3.0e-005
+Motif 61 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 62 had a fraction of 1.6e-004
+Motif 62 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 63 had a fraction of 5.2e-005
+Motif 63 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 64 had a fraction of 1.5e-003
+Motif 64 had an E-value of 1.8e-043
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 65 had a fraction of 9.3e-004
+Motif 65 had an E-value of 1.9e-019
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 66 had a fraction of 1.1e-003
+Motif 66 had an E-value of 1.0e-042
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 67 had a fraction of 3.6e-004
+Motif 67 had an E-value of 6.0e+001
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 68 had a fraction of 1.2e-004
+Motif 68 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 69 had a fraction of 5.4e-004
+Motif 69 had an E-value of 1.7e+010
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 70 had a fraction of 7.9e-005
+Motif 70 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 71 had a fraction of 7.4e-005
+Motif 71 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 72 had a fraction of 3.9e-005
+Motif 72 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 73 had a fraction of 2.4e-004
+Motif 73 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 74 had a fraction of 3.7e-004
+Motif 74 had an E-value of 1.4e+001
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 75 had a fraction of 3.4e-004
+Motif 75 had an E-value of 1.9e+007
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 76 had a fraction of 8.9e-004
+Motif 76 had an E-value of 2.3e-006
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 77 had a fraction of 9.3e-004
+Motif 77 had an E-value of 1.9e-012
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 78 had a fraction of 7.7e-004
+Motif 78 had an E-value of 1.1e-010
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 79 had a fraction of 2.7e-004
+Motif 79 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 80 had a fraction of 1.2e-004
+Motif 80 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 81 had a fraction of 1.1e-004
+Motif 81 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 82 had a fraction of 5.4e-005
+Motif 82 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 83 had a fraction of 4.7e-004
+Motif 83 had an E-value of 3.5e-005
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 84 had a fraction of 3.2e-004
+Motif 84 had an E-value of 2.8e-003
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 85 had a fraction of 1.1e-003
+Motif 85 had an E-value of 1.0e-032
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 86 had a fraction of 8.3e-004
+Motif 86 had an E-value of 4.5e-005
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 87 had a fraction of 4.3e-004
+Motif 87 had an E-value of 4.9e+000
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 88 had a fraction of 6.2e-004
+Motif 88 had an E-value of 9.6e-015
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 89 had a fraction of 1.6e-003
+Motif 89 had an E-value of 6.3e-008
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 90 had a fraction of 5.7e-004
+Motif 90 had an E-value of 4.0e-015
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 91 had a fraction of 3.0e-004
+Motif 91 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 92 had a fraction of 2.2e-005
+Motif 92 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 93 had a fraction of 2.1e-005
+Motif 93 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 94 had a fraction of 5.5e-005
+Motif 94 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 95 had a fraction of 1.6e-004
+Motif 95 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 96 had a fraction of 1.0e-005
+Motif 96 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 97 had a fraction of 8.9e-005
+Motif 97 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 98 had a fraction of 1.7e-005
+Motif 98 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 99 had a fraction of 1.1e-004
+Motif 99 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 100 had a fraction of 1.8e-005
+Motif 100 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 101 had a fraction of 2.9e-005
+Motif 101 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 102 had a fraction of 3.8e-005
+Motif 102 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 103 had a fraction of 6.8e-005
+Motif 103 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 104 had a fraction of 1.7e-005
+Motif 104 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 105 had a fraction of 7.3e-005
+Motif 105 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 106 had a fraction of 1.1e-004
+Motif 106 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 107 had a fraction of 3.6e-005
+Motif 107 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 108 had a fraction of 1.8e-005
+Motif 108 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 109 had a fraction of 8.0e-005
+Motif 109 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 110 had a fraction of 1.1e-004
+Motif 110 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 111 had a fraction of 1.6e-005
+Motif 111 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 112 had a fraction of 3.7e-005
+Motif 112 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 113 had a fraction of 9.7e-005
+Motif 113 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 114 had a fraction of 8.3e-005
+Motif 114 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 115 had a fraction of 1.9e-004
+Motif 115 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 116 had a fraction of 5.4e-005
+Motif 116 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 117 had a fraction of 4.8e-005
+Motif 117 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 118 had a fraction of 2.5e-005
+Motif 118 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 119 had a fraction of 1.2e-005
+Motif 119 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 120 had a fraction of 3.5e-006
+Motif 120 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 121 had a fraction of 2.9e-004
+Motif 121 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 122 had a fraction of 2.6e-004
+Motif 122 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 123 had a fraction of 2.7e-004
+Motif 123 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 124 had a fraction of 2.6e-004
+Motif 124 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 125 had a fraction of 2.3e-004
+Motif 125 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 126 had a fraction of 2.3e-004
+Motif 126 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 127 had a fraction of 5.4e-004
+Motif 127 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 128 had a fraction of 3.8e-004
+Motif 128 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 129 had a fraction of 2.5e-004
+Motif 129 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 130 had a fraction of 1.8e-004
+Motif 130 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 131 had a fraction of 3.7e-004
+Motif 131 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 132 had a fraction of 2.1e-004
+Motif 132 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 133 had a fraction of 2.3e-004
+Motif 133 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 134 had a fraction of 2.8e-004
+Motif 134 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 135 had a fraction of 3.9e-004
+Motif 135 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 136 had a fraction of 2.7e-004
+Motif 136 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 137 had a fraction of 2.1e-004
+Motif 137 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 138 had a fraction of 2.8e-004
+Motif 138 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 139 had a fraction of 2.5e-004
+Motif 139 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 140 had a fraction of 2.2e-004
+Motif 140 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 141 had a fraction of 1.8e-004
+Motif 141 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 142 had a fraction of 1.2e-004
+Motif 142 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 143 had a fraction of 1.5e-004
+Motif 143 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 144 had a fraction of 8.9e-005
+Motif 144 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 145 had a fraction of 1.4e-004
+Motif 145 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 146 had a fraction of 1.3e-004
+Motif 146 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 147 had a fraction of 1.3e-004
+Motif 147 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 148 had a fraction of 1.9e-004
+Motif 148 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 149 had a fraction of 1.3e-004
+Motif 149 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 150 had a fraction of 3.0e-004
+Motif 150 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 151 had a fraction of 4.5e-004
+Motif 151 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 152 had a fraction of 8.8e-004
+Motif 152 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 153 had a fraction of 4.6e-004
+Motif 153 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 154 had a fraction of 3.2e-004
+Motif 154 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 155 had a fraction of 4.5e-004
+Motif 155 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 156 had a fraction of 3.0e-004
+Motif 156 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 157 had a fraction of 4.3e-004
+Motif 157 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 158 had a fraction of 3.6e-004
+Motif 158 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 159 had a fraction of 3.9e-004
+Motif 159 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 160 had a fraction of 2.7e-004
+Motif 160 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 161 had a fraction of 2.8e-004
+Motif 161 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 162 had a fraction of 3.1e-004
+Motif 162 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 163 had a fraction of 4.1e-004
+Motif 163 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 164 had a fraction of 4.2e-004
+Motif 164 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 165 had a fraction of 2.8e-004
+Motif 165 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 166 had a fraction of 2.7e-004
+Motif 166 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 167 had a fraction of 3.7e-004
+Motif 167 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 168 had a fraction of 2.3e-004
+Motif 168 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 169 had a fraction of 2.2e-004
+Motif 169 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 170 had a fraction of 3.4e-004
+Motif 170 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 171 had a fraction of 2.8e-004
+Motif 171 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 172 had a fraction of 2.3e-004
+Motif 172 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 173 had a fraction of 2.2e-004
+Motif 173 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 174 had a fraction of 1.9e-004
+Motif 174 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 175 had a fraction of 5.3e-004
+Motif 175 had an E-value of 8.6e-006
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 176 had a fraction of 8.5e-004
+Motif 176 had an E-value of 3.3e-013
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 177 had a fraction of 7.0e-004
+Motif 177 had an E-value of 1.1e-004
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 178 had a fraction of 8.9e-005
+Motif 178 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 179 had a fraction of 6.9e-005
+Motif 179 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 180 had a fraction of 2.0e-004
+Motif 180 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 181 had a fraction of 1.0e-004
+Motif 181 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 182 had a fraction of 8.9e-005
+Motif 182 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 183 had a fraction of 2.0e-004
+Motif 183 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 184 had a fraction of 1.2e-004
+Motif 184 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 185 had a fraction of 1.1e-004
+Motif 185 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 186 had a fraction of 9.0e-005
+Motif 186 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 187 had a fraction of 9.3e-005
+Motif 187 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 188 had a fraction of 1.5e-004
+Motif 188 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 189 had a fraction of 1.8e-004
+Motif 189 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 190 had a fraction of 1.2e-004
+Motif 190 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 191 had a fraction of 1.1e-004
+Motif 191 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 192 had a fraction of 1.2e-004
+Motif 192 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 193 had a fraction of 2.5e-004
+Motif 193 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 194 had a fraction of 1.8e-004
+Motif 194 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 195 had a fraction of 2.6e-004
+Motif 195 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 196 had a fraction of 1.5e-004
+Motif 196 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 197 had a fraction of 2.3e-004
+Motif 197 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 198 had a fraction of 1.2e-004
+Motif 198 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 199 had a fraction of 1.6e-004
+Motif 199 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 200 had a fraction of 1.3e-004
+Motif 200 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 201 had a fraction of 1.7e-004
+Motif 201 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 202 had a fraction of 1.0e-004
+Motif 202 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 203 had a fraction of 1.3e-004
+Motif 203 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Motif 204 had a fraction of 2.0e-004
+Motif 204 had an E-value of 1.8e+308
+Saving motif as a png...
+Saving motif as an eps...
+Saving fractions list
+Saving distances list
+Saving PWM
+Ended at:
+Mon Sep 16 14:12:07 2013

@@ -225,7 +225,7 @@ theta_motif, motif PWM matrix
 theta_background_matrix, background PWM matrix
 lambda_motif, motif frequency
 """
-def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor, B=0.0001, smoothing=False, revcomp=True):
+def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor, B=0.0001, smoothing=True, revcomp=True):
     W = theta_motif.shape[0]#get the length of the motif
     s1_1 = lambda_motif#the expected number of occurrences of the motif
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
@@ -726,6 +726,8 @@ The main online MEME algorithm.
 
 Input:
 Y, list of strings. dataset of sequences
+Wmin, minimum width of core motifs to search for
+Wmax, maximum width of core motifs to search for
 Wmin, minimum width of motifs to search for
 Wmax, maximum width of motifs to search for
 NPASSES, number of distinct motifs to search for
@@ -734,7 +736,7 @@ rthresh, threshold for relative entropy to trim
 Output:
 fractions
 """
-def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,fudgefactor=1.0,revcomp=True):
+def meme(Y,Kmin,Kmax,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,fudgefactor=1.0,revcomp=True):
     #6/28/13, check with initial conditions matching solution
     #p = Pool(64)
     #s=p.map(functools.partial(f,y=Y),range(64))
@@ -776,10 +778,13 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,fudgefactor=1.0,revcomp=Tr
         logevs = list()
         #Use DREME to find a core seed
         (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
-            find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs,minw=Wmin,maxw=Wmax)
+            find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs,mink=Kmin,maxk=Kmax,minw=Wmin,maxw=Wmax)
         print str(pos) + ' positive sites'
         print str(neg) + ' negative sites'
-        W = Wmin
+        minsites = 10#pos/3
+        maxsites = pos*3
+        print 'Padding both sides of best RE with 2 Ns'
+        best_word = 'NN' + best_word + 'NN'
         print 'A PWM made from the best RE:'
         DQ = array(dre.make_pwm_from_re(best_word, pos_seqs, pseudo_count=max(1.0*neg,1.0)).getFreq())
         print DQ
@@ -790,104 +795,80 @@ def meme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,fudgefactor=1.0,revcomp=Tr
             left_pad = pad/2
             right_pad = pad - left_pad
             DQ = concatenate((theta_background.repeat(left_pad,axis=0),DQ,theta_background.repeat(right_pad,axis=0)))
-        Wmax = W
-        while W <= Wmax:
-            print 'Using starting point from DREME PWM generation...'
-            starting_points = [DQ]
-            #n = sum([max(0,len(y) - W + 1) for y in Y])#gets number of subsequences
-            X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
-            #subsequences are grouped by sequences for normalization purposes
-            Is = [[sequenceToI(xij) for xij in xi] for xi in X]#list of indicator matrices for this specific W, same dimensions as X    
-            #Valid sequence and subsequence index combinations to search. 
-            #subsequences with deleted base pairs will yield a None indicator matrix, which will be ignored in this list
-            seqindpairs = [[(seqind,subseqind) for subseqind in xrange(len(Is[seqind])) if Is[seqind][subseqind] is not None] for seqind in xrange(len(Is))]
-            seqindpairs = list(chain(*seqindpairs))
-            n = len(seqindpairs)#total number of subsequences
-            random.shuffle(seqindpairs)
-            #print 'Generating starting points from subsequences'
-            #starting_points = generate_starting_points(best_word, pos_seqs, W, tries)
-            #for t in range(tries):#right now NPASSES is number of tries per width
-            t = 0
-            for theta_motif in starting_points:
-                print 'Try ' + str(t + 1) + ' for width ' + str(W)
-                t += 1
-                #From DREME's best re, predict the fraction 
-                if revcomp:
-                    lambda_motif = 1.0*pos/n*2#multiply by 2 to account for other seqs
-                else:
-                    lambda_motif = 1.0*pos/n/2*2#dividing by 2 accounts for the fact that RC not accounted for
-                #From the best RE, search the positive sequence set and generate a starting PWM
-                #print 'Generating starting point from subsequences'
-                #theta_motif = generate_starting_point(best_word, pos_seqs, W)
-                #theta_motif = load('NRSF_test.npy')
-                theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
-                theta_motif, theta_background_matrix, lambda_motif, fractions, distances = Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor)
-                if lambda_motif > 10.0*len(Y)/n:
-                    print 'Fraction is too high. Setting log E-value to max value'
-                    print 'Motif E-value exceeded threshold. Trying again...'
-                    #save the failed result
-                    logev = BIGLOG
-                    all_logevs.append(logev)
-                    all_lambda_motifs.append(lambda_motif)
-                    all_theta_motifs.append(theta_motif)
-                    all_theta_background_matrices.append(theta_background_matrix)
-                    all_fractionses.append(fractions)
-                    all_distanceses.append(distances)
-                    continue
-                if lambda_motif < 10.0/n:
-                    print 'Fraction is too low. Setting log E-value to max value'
-                    print 'Motif E-value exceeded threshold. Trying again...'
-                    #save the failed result
-                    logev = BIGLOG
-                    all_logevs.append(logev)
-                    all_lambda_motifs.append(lambda_motif)
-                    all_theta_motifs.append(theta_motif)
-                    all_theta_background_matrices.append(theta_background_matrix)
-                    all_fractionses.append(fractions)
-                    all_distanceses.append(distances)
-                    continue
-                print 'Finding number of motif sites'
-                nsites_dis = get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is)
-                print 'Found ' + str(nsites_dis) + ' sites'
-                #if there are too many discovered sites, something is wrong, so assign a high E-value
-                if nsites_dis > 10*len(Y):#for now, assume problem if more than 10 instances per sequence
-                    print 'Too many sites found. Setting log E-value to max value'
-                    logev = BIGLOG
-                elif nsites_dis < 10:
-                    print 'Less than 10 sites discovered. Setting log E-value to max value'
-                    logev = BIGLOG
-                else:    
-                    mm = me.MEME(theta_motif, theta_background_matrix[0], lambda_motif, Y, nsites_dis)
-                    print 'Calculating log E-value'
-                    mm.calc_ent()
-                    logev = mm.get_logev()
-                    print 'Log E-value: ' + str(logev)
-                    #as of 9/9/13, removed trimming
-                    #rentropy = mm.get_rentropy()
-                    #trim PWM
-                    #theta_motif = trim_PWM(theta_motif, rentropy, rthresh)
-                    #trim the background matrix to same size
-                    #theta_background_matrix = theta_background_matrix[0:theta_motif.shape[0],:]
-                if logev < log_ethresh:#if valid motif, save it
-                    print 'Motif E-value less than threshold. Saving...'
-                    logevs.append(logev)
-                    lambda_motifs.append(lambda_motif)
-                    theta_motifs.append(theta_motif)
-                    theta_background_matrices.append(theta_background_matrix)
-                    fractionses.append(fractions)
-                    distanceses.append(distances)
-                    #break#break current loop and move onto next width
-                else:
-                    print 'Motif E-value exceeded threshold. Trying again...'
-                #save everything
-                all_logevs.append(logev)
-                all_lambda_motifs.append(lambda_motif)
-                all_theta_motifs.append(theta_motif)
-                all_theta_background_matrices.append(theta_background_matrix)
-                all_fractionses.append(fractions)
-                all_distanceses.append(distances)
-            W = int(round(W*sqrt(2)))
-        #went through all widths, now pick motif with best E-value
+        W = DQ.shape[0]
+        print 'Using starting point from DREME PWM generation...'
+        #n = sum([max(0,len(y) - W + 1) for y in Y])#gets number of subsequences
+        X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
+        #subsequences are grouped by sequences for normalization purposes
+        Is = [[sequenceToI(xij) for xij in xi] for xi in X]#list of indicator matrices for this specific W, same dimensions as X    
+        #Valid sequence and subsequence index combinations to search. 
+        #subsequences with deleted base pairs will yield a None indicator matrix, which will be ignored in this list
+        seqindpairs = [[(seqind,subseqind) for subseqind in xrange(len(Is[seqind])) if Is[seqind][subseqind] is not None] for seqind in xrange(len(Is))]
+        seqindpairs = list(chain(*seqindpairs))
+        n = len(seqindpairs)#total number of subsequences
+        random.shuffle(seqindpairs)
+        #print 'Generating starting points from subsequences'
+        #starting_points = generate_starting_points(best_word, pos_seqs, W, tries)
+        #for t in range(tries):#right now NPASSES is number of tries per width
+        #The bounds for the fudge factor
+        a = 0.0
+        b = 1.0
+        c = 1.0
+        for t in range(tries):
+            print 'Try ' + str(t + 1) + ' for motif ' + str(npass + 1)
+            print 'Using a fudge factor of ' + str(b)
+            fudgefactor = b
+            theta_motif = DQ
+            #From DREME's best re, predict the fraction 
+            if revcomp:
+                lambda_motif = 1.0*pos/n*2#multiply by 2 to account for other seqs
+            else:
+                lambda_motif = 1.0*pos/n/2*2#dividing by 2 accounts for the fact that RC not accounted for
+            #From the best RE, search the positive sequence set and generate a starting PWM
+            #print 'Generating starting point from subsequences'
+            #theta_motif = generate_starting_point(best_word, pos_seqs, W)
+            #theta_motif = load('NRSF_test.npy')
+            theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
+            theta_motif, theta_background_matrix, lambda_motif, fractions, distances = Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor)
+            print 'Finding number of motif sites'
+            nsites_dis = get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is)
+            print 'Found ' + str(nsites_dis) + ' sites'
+            #if there are too many discovered sites, something is wrong, so assign a high E-value
+            shouldIBreak = False
+            if nsites_dis > maxsites:#for now, assume problem if more than 10 instances per sequence
+                print 'Too many sites found. Setting log E-value to max value. Lowering fudge factor'
+                logev = BIGLOG
+                c = b
+                b = mean([a,b])
+            elif nsites_dis < minsites:
+                print 'Not enough sites found. Setting log E-value to max value'
+                logev = BIGLOG
+                a = b
+                b = mean([b,c])
+            else:
+                shouldIBreak = True
+                print 'Motif has an acceptable number of sites'    
+                mm = me.MEME(theta_motif, theta_background_matrix[0], lambda_motif, Y, nsites_dis)
+                print 'Calculating log E-value'
+                mm.calc_ent()
+                logev = mm.get_logev()
+                print 'Log E-value: ' + str(logev)
+                logevs.append(logev)
+                lambda_motifs.append(lambda_motif)
+                theta_motifs.append(theta_motif)
+                theta_background_matrices.append(theta_background_matrix)
+                fractionses.append(fractions)
+                distanceses.append(distances)
+            #save everything
+            all_logevs.append(logev)
+            all_lambda_motifs.append(lambda_motif)
+            all_theta_motifs.append(theta_motif)
+            all_theta_background_matrices.append(theta_background_matrix)
+            all_fractionses.append(fractions)
+            all_distanceses.append(distances)
+            if shouldIBreak:
+                break
+        #went through all tries or found a motif with acceptable number of sites
         #if no valid motif found, then exit
         if len(logevs) == 0:
             print 'No motif found, so just deleting core binding site...'
@@ -1112,18 +1093,20 @@ The main executable function
 """
 def main():
     usage = "usage: %prog [options] <input FASTA>"
-    description = "The program applies the Online MEME algorithm to find motifs in a FASTA file"
+    description = "The program applies a modified Online MEME algorithm to find short motifs in a FASTA file"
     parser = ArgumentParser(description=description)
     parser.add_argument('fastafile', metavar='f', help='FASTA file containing the sequences')
     parser.add_argument("-p", "--processes", help="optional number of parallelized processes", type=int, default=1)
-    parser.add_argument("-w", "--width", dest="width", help="Width of the motif to search for", type=int, default=0)
-    parser.add_argument("-minw", dest="minwidth", help="Minimum width of the motif to search for", type=int, default=10)
-    parser.add_argument("-maxw", dest="maxwidth", help="Maximum width of the motif to search for", type=int, default=40)
+    parser.add_argument("-w", "--width", dest="width", help="Width of the motif to search for. This makes the program only search for a motif of this width. Beware if greater than 8", type=int, default=0)
+    parser.add_argument("-minw", dest="minwidth", help="Minimum width of the motif to search for. The default is 3, which is the width of the smallest core motif.", type=int, default=3)
+    parser.add_argument("-maxw", dest="maxwidth", help="Maximum width of the motif to search for. This program does one refinement at this width (if greater than 8), and then picks the most significant short-mer. Default: 8", type=int, default=8)
+    parser.add_argument("-mink", dest="mink", help="Minimum width of the core to search for. The default is 3, which is the width of the smallest core motif.", type=int, default=3)
+    parser.add_argument("-maxk", dest="maxk", help="Maximum width of the core to search for. Default: 8", type=int, default=8)
     parser.add_argument("-m", "--nummotifs", dest="nummotifs", help="Number of motifs to search for", type=int, default=1)
-    parser.add_argument("-t", "--tries", dest="tries", help="Number of tries for each width", type=int, default=10)
+    parser.add_argument("-t", "--tries", dest="tries", help="Number of tries for each motif discovered. The fudge factor is changed until the number of discovered sites is in the \"acceptable\" range", type=int, default=10)
     parser.add_argument("-e", "--ethresh", dest="ethresh", help="E-value threshold. Default: 0.05", type=float, default=0.05)
     parser.add_argument("-r", "--rthresh", dest="rthresh", help="Relative entropy threshold. Default: 0.1", type=float, default=0.1)
-    parser.add_argument("-f", "--fudge", dest="fudge", help="Fudge factor for short motifs. Default: 1.0", type=float, default=0.1)    
+    parser.add_argument("-f", "--fudge", dest="fudge", help="Fudge factor for short motifs. Default: 1.0", type=float, default=1.0)    
     parser.add_argument("-s", "--seed", dest="seed", help="Random seed", type=int, default=1)
     parser.add_argument("-o", "--output", dest="output", help="Folder for all output files", default="output")    
     args = parser.parse_args()
@@ -1133,6 +1116,8 @@ def main():
     w = args.width
     ethresh = args.ethresh
     rthresh = args.rthresh
+    mink = args.mink
+    maxk = args.maxk
     if w == 0:
         minw = args.minwidth
         maxw = args.maxwidth
@@ -1159,7 +1144,7 @@ def main():
     #Use DREME's SeqIO to read in FASTA to list
     seqs = sequence.convert_ambigs(sequence.readFASTA(args.fastafile, None, True))
     tries = args.tries
-    theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs = meme(seqs,minw,maxw,nmotifs,ethresh,rthresh,tries,fudgefactor)
+    theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs = meme(seqs,mink,maxk,minw,maxw,nmotifs,ethresh,rthresh,tries,fudgefactor)
     k = 1
     for theta_motif, theta_background_matrix, lambda_motif, fractions, distances, logev in zip(theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs):
         outputMotif(theta_motif, theta_background_matrix, lambda_motif, fractions, distances, logev, k, outpre)
