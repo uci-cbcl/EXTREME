@@ -35,5 +35,37 @@ $ python setup.py build_ext --inplace
 USAGE
 =====
 
+
+Overview
+--------
+EXTREME comes in four different flavors:
+
+* `EXTREME.py`. The original EXTREME algorithm. This flavor is best suited for ChIP-Seq datasets for TFs with long
+motifs with high information content such as NRSF. Its seeding strategy involves generating starting points from
+sequences centered around an instance of the DREME regular expression seed. It includes a preprocessing set
+to take the middle 100 nucleotides of all sequences.
+
+* `ShortEXTREME.py`. This flavor is best suited for ChIP-Seq datasets for TFs with 
+short motifs such as NANOG. Its seeding strategy involves padding the DREME regular expression seed with universal
+letters and then generating a PWM starting point from the nucleotide counts of sequences matching the regular expression.
+It includes a preprocessing set to take the middle 100 nucleotides of all sequences.
+
+* `FootprintEXTREME.py`. This flavor is best suited for finding motifs in footprint data. Uses the same seeding
+strategy as ShortEXTREME, but pads using four universal letters on each side instead of two.
+
+* `ParFootprintEXTREME.py`. This flavor is best suited for finding motifs in footprint data. It is meant to be
+used as part of a batch job in parallel. It generates an initial PWM from a DREME regular expression seed in a
+DREME output file and then runs the online EM algorithm to completion.
+
+Arguments
+---------
+
+* `-t TRIES`. The number of tries of the online EM algorithm before giving up on the current seed.
+
 Output files
 ------------
+**\*/Motif_x.png** PNG output of the x-th motif. Includes all motifs, not just the most significant ones.
+
+**\*/Motif_x.eps** EPS output of the x-th motif. Includes all motifs, not just the most significant ones.
+
+**\*/MEMEoutput.meme** Minimal MEME format output of discovered motifs.
