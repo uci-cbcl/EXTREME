@@ -59,10 +59,12 @@ DREME output file and then runs the online EM algorithm to completion.
 
 Arguments
 ---------
+The following arguments are common to all variants of EXTREME:
 
 * `-t TRIES`. The number of tries of the online EM algorithm before giving up on the current seed.
 * `-m NUMMOTIFS`. The number of motifs to search for.
-* `
+* `-o OUTPUT`. The output folder containing all output files.
+* 
 
 
 Output files
