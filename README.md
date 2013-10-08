@@ -61,6 +61,9 @@ Arguments
 ---------
 
 * `-t TRIES`. The number of tries of the online EM algorithm before giving up on the current seed.
+* `-m NUMMOTIFS`. The number of motifs to search for.
+* `
+
 
 Output files
 ------------
