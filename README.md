@@ -59,11 +59,34 @@ DREME output file and then runs the online EM algorithm to completion.
 
 Arguments
 ---------
+The following arguments are common to all variants of EXTREME:
 
 * `-t TRIES`. The number of tries of the online EM algorithm before giving up on the current seed.
 * `-m NUMMOTIFS`. The number of motifs to search for.
-* `
+* `-o OUTPUT`. The output folder containing all output files.
+* `-s SEED`. Random seed for shuffling sequences and dataset positions.
+* `-w WIDTH`. The width of a motif to search for. If this value is set, both MINW and MAXW are set to this value.
+* `-minw MINW`. The minimum motif width to search for.
+* `-maxw MAXW`. The maximum motif width to search for. EXTREME.py looks for motifs of widths between MINW and MAXW,
+in increments of sqrt(2). For the other three variants, if MAXW is greater than MAXK, it will attempt to generate
+a new regular expression seed at width MAXW.
 
+The following arguments are unique ShortEXTREME.py, FootprintEXTREME.py, and ParFootprintEXTREME.py:
+* `-mink MINK`. The minimum DREME core width to search for.
+* `-maxk MAXK`. The maximum DREME core width to search for. 
+
+Running EXTREME
+---------------
+An example of running EXTREME using the included NRSF example:
+```
+$ python EXTREME.py -minw 15 -maxw 35 -m 5 -o outputFolder NRSF.fasta
+```
+
+Alternatively, the Python script file can be made an executable:
+```
+$ chmod +x EXTREME.py
+$ ./EXTREME.py -minw 15 -maxw 35 -m 5 -o outputFolder NRSF.fasta
+```
 
 Output files
 ------------
