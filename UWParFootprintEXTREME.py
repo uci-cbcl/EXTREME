@@ -257,7 +257,7 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
     mu = theta_background_matrix#the first background matrix is the average frequencies in the negative set
     Bmu = B*mu#the priors to be added each step
     #9/10/13 was *20, now *10
-    g0 = lambda_motif*10;
+    g0 = max(0.02,lambda_motif*20)
     print "Initial step size of " + str(g0)
     print "Running Online EM algorithm..."
     for seqindpair in seqindpairs:#iterate through each sequence index and start pair
@@ -733,13 +733,14 @@ Wmax, maximum width of core motifs to search for
 Wmin, minimum width of motifs to search for
 Wmax, maximum width of motifs to search for
 best_word, IUPAC DREME word to initialize from
+pwm_guess, the UW PWM guess
 padding, number of universal letter padding
 ethresh, threshold for E-value to save a motif
 rthresh, threshold for relative entropy to trim
 Output:
 fractions
 """
-def extreme(Y,Kmin,Kmax,Wmin,Wmax,padding,best_word,ethresh,rthresh,tries=10,fudgefactor=1.0,revcomp=True):
+def extreme(Y,Kmin,Kmax,Wmin,Wmax,padding,best_word,pwm_guess,ethresh,rthresh,tries=10,fudgefactor=1.0,revcomp=True):
     #6/28/13, check with initial conditions matching solution
     #p = Pool(64)
     #s=p.map(functools.partial(f,y=Y),range(64))
@@ -747,7 +748,7 @@ def extreme(Y,Kmin,Kmax,Wmin,Wmax,padding,best_word,ethresh,rthresh,tries=10,fud
     BIGLOG = log(sys.float_info.max)
     log_ethresh = log(ethresh)
     pos_seqs = Y
-    neg_seqs = sequence.convert_ambigs(sequence.readFASTA('K562_removed4Strong_removedAAAAAAAAAA_removedTTTTTTTTTT_ex4_negative.fasta.masked', None, True))
+    neg_seqs = sequence.convert_ambigs(sequence.readFASTA('negative.fasta.masked', None, True))
     _dna_alphabet = 'ACGT'
     #The discovered motifs and results to be reported
     discovered_lambda_motifs = list()
@@ -774,8 +775,6 @@ def extreme(Y,Kmin,Kmax,Wmin,Wmax,padding,best_word,ethresh,rthresh,tries=10,fud
         fractionses = list()
         distanceses = list()
         logevs = list()
-        print 'Padding both sides of RE with ' + str(padding) + ' Ns'
-        best_word = padding*'N' + best_word + padding*'N'
         dreme_re = dre.make_dna_re(best_word)
         pos = 0
         neg = 0
@@ -790,7 +789,7 @@ def extreme(Y,Kmin,Kmax,Wmin,Wmax,padding,best_word,ethresh,rthresh,tries=10,fud
         minsites = 10
         maxsites = pos*3
         #print 'A PWM made from the best RE:'
-        DQ = array(dre.make_pwm_from_re(best_word, pos_seqs, pseudo_count=max(1.0*neg,1.0)).getFreq())
+        DQ = pwm_guess
         #print DQ
         """
         if DQ.shape[0] < Wmin:
@@ -802,7 +801,7 @@ def extreme(Y,Kmin,Kmax,Wmin,Wmax,padding,best_word,ethresh,rthresh,tries=10,fud
             DQ = concatenate((theta_background.repeat(left_pad,axis=0),DQ,theta_background.repeat(right_pad,axis=0)))
         """ 
         W = DQ.shape[0]
-        print 'Using starting point from DREME PWM generation...'
+        #print 'Using starting point from DREME PWM generation...'
         #n = sum([max(0,len(y) - W + 1) for y in Y])#gets number of subsequences
         X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
         #subsequences are grouped by sequences for normalization purposes
@@ -1126,10 +1125,10 @@ The main executable function
 """
 def main():
     usage = "usage: %prog [options] <input FASTA>"
-    description = "The program applies a modified EXTREME algorithm to find short motifs in a FASTA file. This variant is best for finding motifs in footprint data in parallelized fashion."
+    description = "The program applies a modified EXTREME algorithm to find short motifs in a FASTA file. This variant is best for finding motifs in footprint data in parallelized fashion. It uses one of the 683 UW motifs for seeding."
     parser = ArgumentParser(description=description)
     parser.add_argument('fastafile', metavar='f', help='FASTA file containing the sequences')
-    parser.add_argument('dremefile', metavar='d', help='DREME file containing seeds')
+    parser.add_argument('uwfolder', metavar='u', help='UW folder containing seeds')
     parser.add_argument('indexvalue', metavar='i', help='Which DREME seed to use', type=int)
     parser.add_argument("-p", "--padding", help="Number of padding letters", type=int, default=6)
     parser.add_argument("-w", "--width", dest="width", help="Width of the motif to search for. This makes the program only search for a motif of this width. Beware if greater than 8", type=int, default=0)
@@ -1177,15 +1176,19 @@ def main():
     print "Started at:"
     print time.ctime()
     print "Getting the " + str(args.indexvalue) + "-th Seed"
-    dremefile = open(args.dremefile)
-    lines = dremefile.readlines()
-    dremefile.close()
-    best_word = lines[args.indexvalue-1][:-1]
+    listoffiles = os.listdir(args.uwfolder)
+    for f in listoffiles:
+        if 'UW.Motif' in f:
+            parts = f.split('.')
+            num = int(parts[2][0:4])
+            if num == args.indexvalue:
+                best_word = parts[2][5:].upper()
+                pwm_guess = load(args.uwfolder + '/' + f)
     print best_word
     #Use DREME's SeqIO to read in FASTA to list
     seqs = sequence.convert_ambigs(sequence.readFASTA(args.fastafile, None, True))
     tries = args.tries
-    theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs, disc_pwms, disc_logevs = extreme(seqs,mink,maxk,minw,maxw,args.padding,best_word,ethresh,rthresh,tries,fudgefactor)
+    theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs, disc_pwms, disc_logevs = extreme(seqs,mink,maxk,minw,maxw,args.padding,best_word,pwm_guess,ethresh,rthresh,tries,fudgefactor)
     k = 1
     outputMEMEformat(disc_pwms, disc_logevs, outpre)
     for theta_motif, theta_background_matrix, lambda_motif, fractions, distances, logev in zip(theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs):
