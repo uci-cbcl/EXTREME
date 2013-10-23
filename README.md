@@ -162,4 +162,5 @@ result after convergence of any seed).
 
 **\*/Motif_x.eps** Same as above, except in EPS format.
 
-**\*/MEMEoutput.meme** Minimal MEME format output of discovered motifs. 
+**\*/MEMEoutput.meme** Minimal MEME format output of discovered motifs (not all seeds. Only the motifs EXTREME selected at the end
+of a seed search.)
