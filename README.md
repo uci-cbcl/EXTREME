@@ -140,6 +140,18 @@ Note that in this example, we used 0 pseudo counts, which differs from the defau
 the FASTA file from the previous example and deleted four motif instances and repetitive elements so that the
 EXTREME algorithm can converge onto other motifs.
 
+Here's another example for your amusement:
+```
+$ cd ExampleFiles
+$ for i in {1..683}; do
+> qsub -S /bin/bash -q mycluster <<EOF
+> ../ParallelFootprintEXTREME.py -p 0.0 K562_footprints_extended5_merged.fasta.masked K562_footprints_extended5_merged_negative.fasta.masked ENCODE_Motif_names ENCODE_PosSites ENCODE.meme $i
+> EOF
+> done
+```
+
+Note that these last two examples will generate many output folders. You have been warned.
+
 Output files
 ------------
 **\*/Motif_x.png** PNG output of the x-th motif. Includes all motifs, not just the most significant ones (that is, the final
