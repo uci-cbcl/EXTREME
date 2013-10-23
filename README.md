@@ -91,13 +91,15 @@ into the folder "outputFolder":
 $ cd ExampleFiles
 $ python ../EXTREME.py -minw 23 -maxw 33 -m 2 -o outputFolder -t 20 GM12878_NRSF_intersected.fasta.masked
 ```
-The ../ indicates to execute EXTREME.py in the parent folder.
+The ../ indicates to execute EXTREME.py in the parent folder. Note that EXTREME is fast enough to test many seeds
+and process them to convergence with the online EM algorithm. However, a more thorough search using more seeds
+will linearly increase the running time of EXTREME.
 
 Alternatively, the Python script file can be made an executable:
 ```
 $ chmod +x EXTREME.py
 $ cd ExampleFiles
-$ python ../EXTREME.py -minw 23 -maxw 33 -m 2 -o outputFolder -t 20 GM12878_NRSF_intersected.fasta.masked
+$ ../EXTREME.py -minw 23 -maxw 33 -m 2 -o outputFolder -t 20 GM12878_NRSF_intersected.fasta.masked
 ```
 However, this approach is not always successful. Most motifs are usually shorter and do not work so well with this strategy, such
 as CTCF and NANOG. In cases like these, we recommend using ShortEXTREME.py. Here is an example that uses ShortEXTREME.py
