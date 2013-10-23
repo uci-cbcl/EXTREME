@@ -353,7 +353,7 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
             #backgrounds.append(theta_background)
             #if n > nstart, then start using averaged parameters for the upcoming E-step
             #have to repeat the normalization to ensure probability is properly conserved
-        if n > nstart:
+        """if n > nstart:
             lambda_motif = mean(fractions[n/2:n],axis=0)#new fraction is mean of previous fractions
             theta_motif = mean(pwms[n/2:n],axis=0)#new pwm is mean of previous pwms
             theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
@@ -361,7 +361,7 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
             theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
                 #theta_background = array([theta_background])#prepare background for repeat
             theta_background_matrix = theta_background.repeat(W,axis=0)
-            """
+            
                 lambda_motif = fractions_sum/(n+1)
                 theta_motif = pwms_sum/(n+1)
                 theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
@@ -497,9 +497,9 @@ def get_best_re(re_pvalues, pos_seqs, unerased_pos_seqs, unerased_neg_seqs, minw
 Similar to DREME's find_print function. Searches the sequences for the most significant RE.
 Uses the default parameters from DREME.
 
+Adapted from DREME.py by T. Bailey.
+
 Input:
-
-
 pos_seqs - list of strings, positive sequence set
 neg_seqs - list of strings, negative sequence set
 unerased_pos_seqs - list of strings, the original unerased positive sequence set
@@ -1080,12 +1080,12 @@ def outputMotif(theta_motif, theta_background_matrix, lambda_motif, fractions, d
     fout = open(outstr + "Motif_" + str(k) + '.eps', 'w')
     eps_formatter(data, forma, fout)
     fout.close()
-    print 'Saving fractions list'
-    save(outstr + "Fractions_" + str(k), fractions)
-    print 'Saving distances list'
-    save(outstr + "Distances_" + str(k), distances)
-    print 'Saving PWM'
-    save(outstr + "PWM_" + str(k), theta_motif)
+    #print 'Saving fractions list'
+    #save(outstr + "Fractions_" + str(k), fractions)
+    #print 'Saving distances list'
+    #save(outstr + "Distances_" + str(k), distances)
+    #print 'Saving PWM'
+    #save(outstr + "PWM_" + str(k), theta_motif)
     #img = imread('results.png')
     #imshow(img)
     #show()
@@ -1129,7 +1129,7 @@ The main executable function
 """
 def main():
     usage = "usage: %prog [options] <input FASTA>"
-    description = "The program applies the Online MEME algorithm to find motifs in a FASTA file"
+    description = "The program applies the EXTREME algorithm to find motifs in a FASTA file. This variant is best for finding long motifs in ChIP-Seq data."
     parser = ArgumentParser(description=description)
     parser.add_argument('fastafile', metavar='f', help='FASTA file containing the sequences')
     parser.add_argument("-p", "--processes", help="optional number of parallelized processes", type=int, default=1)
@@ -1168,7 +1168,7 @@ def main():
         if exc.errno == errno.EEXIST:
             if not clobber:
                 print >> sys.stderr, ("output directory (%s) already exists "
-                "but DREME was not told to clobber it") % (outdir); sys.exit(1)
+                "but EXTREME was not told to clobber it") % (outdir); sys.exit(1)
         else: raise
     import time
     print "Started at:"
