@@ -206,9 +206,16 @@ def overlap_occurrences(X, W):
                 counts[i+j] = counts[i+j] + 1
     return counts
 
+"""
+Calculates and returns the symmetrized KL Divergence between two PFMs.
+"""
+def KLD(x,y):
+    Z = 0.5*(sum(x*log(x/y)) + sum(y*log(y/x)))
+    return Z
+
 
 """
-The EM algorithm. 
+The online EM algorithm. 
 
 Input:
 Is, list of lists of indicator matrices. dataset of sequences
