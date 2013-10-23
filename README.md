@@ -132,7 +132,7 @@ in which we go through all 683 seeds in the ENCODE database:
 $ cd ExampleFiles
 $ for i in {1..683}; do
 > qsub -S /bin/bash -q mycluster <<EOF
-> ../ParallelFootprintEXTREME.py -p 0.0 K562_footprints_extended5_merged_Round2.fasta.masked K562_footprints_extended5_merged_Round2_negative.fasta.masked ENCODE_Motif_names ENCODE_PosSites_Round2 ENCODE.meme $i
+> ../ParallelFootprintEXTREME.py -t 15 -p 0.0 K562_footprints_extended5_merged_Round2.fasta.masked K562_footprints_extended5_merged_Round2_negative.fasta.masked ENCODE_Motif_names ENCODE_PosSites_Round2 ENCODE.meme $i
 > EOF
 > done
 ```
@@ -145,7 +145,7 @@ Here's another example for your amusement:
 $ cd ExampleFiles
 $ for i in {1..683}; do
 > qsub -S /bin/bash -q mycluster <<EOF
-> ../ParallelFootprintEXTREME.py -p 0.0 K562_footprints_extended5_merged.fasta.masked K562_footprints_extended5_merged_negative.fasta.masked ENCODE_Motif_names ENCODE_PosSites ENCODE.meme $i
+> ../ParallelFootprintEXTREME.py -t 15 -p 0.0 K562_footprints_extended5_merged.fasta.masked K562_footprints_extended5_merged_negative.fasta.masked ENCODE_Motif_names ENCODE_PosSites ENCODE.meme $i
 > EOF
 > done
 ```
