@@ -11,7 +11,7 @@ INSTALL
 =======
 
 Required
---------
+---------
 * [Python 2.7](http://www.python.org/download/releases/2.7.6/).
 
 * [Numpy](http://www.numpy.org/).
@@ -21,7 +21,7 @@ Required
 * [Java] (http://www.java.com/).
 
 Optional
-________
+--------
 
 * [WebLogo] (https://code.google.com/p/weblogo/) (3). For generating visual sequence logos in eps and png format.
 
