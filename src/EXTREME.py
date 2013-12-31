@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 from argparse import ArgumentParser
-import dreme as dre
 import random
 import copy
 import errno
 import sys
 import sequence
 from collections import deque
-from numpy import round_,mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, ones, concatenate, argmin
+from numpy import round_,mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, floor, ceil, prod, zeros, ones, concatenate, argmin
 from itertools import chain
 
 """
@@ -187,6 +186,34 @@ def KLD(x,y):
     Z = 0.5*(sum(x*log(x/y)) + sum(y*log(y/x)))
     return Z
 
+def get_probs(seqs, alphabet_string):
+    """ Get the observed probabilities of the letters in a set
+    of sequences.  Ambiguous characters are ignored.
+    Uses an "add-one" prior. From dreme.py by T. Bailey"""
+
+    freqs = {}
+    # initialize with add-one count
+    for char in alphabet_string:
+        freqs[char] = 1
+    # get the frequencies of DNA letters in the sequences
+    for seq in seqs:
+        for char in seq:
+            if freqs.has_key(char):
+                freqs[char] += 1
+            else:
+                freqs[char] = 0         # ambiguous letter
+    # get the total number of non-ambiguous letters
+    n = 0.0
+    for char in alphabet_string:
+        n += freqs[char]
+    # normalize the probabilities
+    probs = {}
+    for char in alphabet_string:
+        probs[char] = freqs[char]/n
+
+    return probs
+
+
 
 """
 The online EM algorithm. 
@@ -313,7 +340,7 @@ def extreme(Y,neg_seqs,minsites,maxsites,pwm_guess,tries=15,revcomp=True):
     all_theta_motifs = list()
     all_theta_background_matrices = list()
     all_logevs = list()
-    dprobs = dre.get_probs(neg_seqs, _dna_alphabet)
+    dprobs = get_probs(neg_seqs, _dna_alphabet)
     #generate first order Markov background based on nucleotide frequencies
     print 'Getting background model'
     theta_background = array([[dprobs['A'], dprobs['C'], dprobs['G'], dprobs['T']]])
@@ -585,6 +612,21 @@ def get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is, revco
             nsites_dis += a
     return nsites_dis
 
+# print very large or small numbers
+# from dreme.py by T. Bailey
+def sprint_logx(logx, prec, format):
+    """ Print x with given format given logx.  Handles very large
+    and small numbers with prec digits after the decimal.
+    Returns the string to print."""
+    log10x = logx/log(10)
+    e = floor(log10x)
+    m = pow(10, (log10x - e))
+    if ( m + (.5*pow(10,-prec)) >= 10):
+        m = 1
+        e += 1
+    str = format % (m, e)
+    return str
+
 """
 Outputs the motif as a web logo. Saves fractions as .npy.
 
@@ -598,8 +640,8 @@ outstr - the prefix for the output files
 """
 def outputMotif(theta_motif, theta_background_matrix, lambda_motif, logev, k, outstr):
     _pv_format = "%3.1fe%+04.0f"
-    f_string = dre.sprint_logx(log(lambda_motif), 1, _pv_format)
-    g_string = dre.sprint_logx(logev, 1, _pv_format)
+    f_string = sprint_logx(log(lambda_motif), 1, _pv_format)
+    g_string = sprint_logx(logev, 1, _pv_format)
     print(("Motif {0:s} had a fraction of {1:s}").format(str(k), f_string))
     print(("Motif {0:s} had an E-value of {1:s}").format(str(k), g_string))
     print 'Saving motif as a png...'
@@ -635,7 +677,7 @@ def outputMEMEformat(disc_pwms, disc_logevs, disc_nsites, outpre):
     f.write("A 0.25000 C 0.25000 G 0.25000 T 0.25000\n\n")
     n = 1
     for pwm, logev, nsites in zip(disc_pwms, disc_logevs, disc_nsites):
-        g_string = dre.sprint_logx(logev, 1, _pv_format)
+        g_string = sprint_logx(logev, 1, _pv_format)
         x = round_(pwm,3)
         w = x.shape[0]
         y = str(x).replace('[','').replace(']','').replace('  ',' ').replace('1.  ','1.000').replace('0.  ','0.000').replace('0.\n', '0.000\n').replace('1.\n', '1.000\n').replace('\n  ','\n')[1:]
