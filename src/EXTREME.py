@@ -6,14 +6,9 @@ import copy
 import errno
 import sys
 import sequence
-#from multiprocessing import Pool
-from numpy import mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, ones, concatenate, argmin, round_
-#from numpy.random import rand
-#from pylab import imread, imshow, plot, show
+from collections import deque
+from numpy import round_,mean,load,save,inf, sign, dot, diag, array, cumsum, sort, sum, searchsorted, newaxis, arange, sqrt, log2, log, power, ceil, prod, zeros, ones, concatenate, argmin
 from itertools import chain
-#from bisect import bisect_left
-#import functools
-import meme as me
 
 """
 Equation 14 from the Bailey and Elkan paper. Calculates P(X|theta_motif). That is,
@@ -183,28 +178,7 @@ For the Online version, this may need to be removed for RAM purposes.
 def getSubsequences(Y, W):
     return [[y[k:k+W] for k in xrange(len(y)-W+1)] for y in Y]
 
-"""
-A function to account for repetitive elements. Counts the number
-of overlapping W-mers at each site on the sequence.
 
-Input:
-X, a string. The nucleotide sequence
-W, motif width
-
-Output:
-counts, array of overlap occurrences. Length of L - W + 1
-"""
-def overlap_occurrences(X, W):
-    L = len(X)
-    counts = ones(L-W+1)
-    for i in range(L-W):
-        s = X[i:i+W]
-        for j in range(1,W):
-            t = X[i+j:i+j+W]
-            if s == t:
-                counts[i] = counts[i] + 1
-                counts[i+j] = counts[i+j] + 1
-    return counts
 
 """
 Calculates and returns the symmetrized KL Divergence between two PFMs.
@@ -232,13 +206,12 @@ theta_motif, motif PWM matrix
 theta_background_matrix, background PWM matrix
 lambda_motif, motif frequency
 """
-def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor, B=0.0001, smoothing=False, revcomp=True):
+def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor, minsites, maxsites, B=0.0001, smoothing=False, revcomp=True):
     W = theta_motif.shape[0]#get the length of the motif
     s1_1 = lambda_motif#the expected number of occurrences of the motif
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
     s2_2 = theta_background_matrix#the matrix holding the expected number of times a letter appears in each position, background
     n = 0#the counter
-    nstart = 1000000000#when to start averaging
     N = len(Is)#number of sequences
     pwms = list()
     backgrounds = list()
@@ -246,698 +219,253 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
     fractions_sum = 0#should be deleted
     pwms_sum = zeros((W,4))#should be deleted
     backgrounds_sum = zeros((W,4))#should be deleted
-    #shuffle the seqindpairs
-    #as of 9/9/13, removed shuffling in this function. Use same ordering for same width
-    #random.shuffle(seqindpairs)
-    #reserve some memory. this was when each sequence had only one subsequence
-    """fractions = zeros(N)
-    pwms = zeros((N,W,4))
-    backgrounds = zeros((N,4))
-    """
-    #prepare lists because we don't know how many subsequences we have in total
-    fractions = [None]#*len(seqindpairs)#pre-allocate space
-    distances = [None]#*len(seqindpairs)#pre-allocate space
-    #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
-    #p = Pool(20)
-    #truemotif = load('PWM_29_correct.npy')
     firstmotif = theta_motif#for tracking how much the motif changes
     mu = theta_background_matrix#the first background matrix is the average frequencies in the negative set
     Bmu = B*mu#the priors to be added each step
-    #9/10/13 was *20, now *10
-    g0 = lambda_motif*10;
+    g0 = max(0.05,lambda_motif*10)
+    g1 = -0.6
     print "Initial step size of " + str(g0)
     print "Running Online EM algorithm..."
-    for seqindpair in seqindpairs:#iterate through each sequence index and start pair
-        seqind = seqindpair[0]
-        start = seqindpair[1]
-        #next two lines were from when I was only using sequences, not indicator matrices
-        #s = Y[seqind]#grab the whole sequence as a string
-        #L = len(s)#length of sequence
-        #starts = range(0,L-W+1)
-        #Is = [sequenceToI(s[k:k+W]) for k in starts]#indicator matrices of all subsequences in sequence s
-        #random.shuffle(starts)#shuffle the starts for randomness
-        #for start in starts:
-            #I = Is[start]
-        step = g0*pow(n+1,-0.6)#the online step size. For OLO6a
-        #step = 0.05*pow(n+1,-0.6)#the online step size. Trying other combinations
-            #step = 0.025*pow(n+1,-0.6)#the online step size. For OLO6a
-            #step = 1.0/10000
-            #E-step
-            #smooth
-        #9/13/13 removed this part so that I can do actual smoothing
-        """
-        if smoothing:
-            L = len(Is[seqind]) + W - 1
-            left = max(0,start-W+1)
-            right = min(L-W+1,start+W)
-            middle = start - left
-            Iss = Is[seqind][left:right]
-            #find expected Z values for all W-mers overlapping the current W-mer
-            Z = [Z0_I(I,theta_motif, theta_background_matrix,lambda_motif) for I in Iss]
-            #find the Zs with parallel mapping
-            #Z = p.map(functools.partial(Z0_I, theta_motif=theta_motif, theta_background_matrix=theta_background_matrix,lambda_motif=lambda_motif),Is[left:right])
-            smooth(Z,W)#smooth the Z values
-            ds1_1 = Z[middle]
-            #print y
-            I = Iss[middle]
-        else:#work here next 8/18/13
-        """
-        I = Is[seqind][start]#grab the current indicator matrix
-        Z = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif, fudgefactor)#perhaps implement RC better here?
-        this_strand = True
-        if revcomp:#if the user wants reverse complements
-            Ir = I_rc(I)
-            Zr = Z0_I(Ir,theta_motif, theta_background_matrix,lambda_motif, fudgefactor)
-            if Zr > Z:
-                Z = Zr
-                I = Ir
-                this_strand = False#opposite strand strong, use reverse complement
-        if smoothing:#if the user wants smoothing
-            Zsum = 0
-            if this_strand:
-                for i in Is[seqind][start - W/2:start + W/2 + 1]:
-                    Zsum += Z0_I(i,theta_motif, theta_background_matrix,lambda_motif)
-            else:
-                for i in Is[seqind][start - W/2:start + W/2 + 1]:
-                    if i is not None:
-                        Zsum += Z0_I(I_rc(i),theta_motif, theta_background_matrix,lambda_motif)
-            if Zsum > 1:#Divide the Z if the sum of Zs greater than 1
-                Z = Z/Zsum
-        ds1_1 = Z
-        I = I + Bmu
-        ds1_2 = ds1_1*I
-        ds2_2 = (1-ds1_1)*I
-        s1_1 = s1_1 + step*(ds1_1 - s1_1)
-        s1_2 = s1_2 + step*(ds1_2 - s1_2)
-            #print s1_2
-        s2_2 = s2_2 + step*(ds2_2 - s2_2)
-            #M-step
-        lambda_motif = s1_1
-        theta_motif = s1_2# + step*Bmu
-        theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
-        #correct the PWM so that no frequency is too big or small
-        #9/10/13 Removed these steps
-        """
-        theta_motif[theta_motif>0.97] = 0.97
-        theta_motif[theta_motif<0.01] = 0.01
-        theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
-        """
-        theta_background = s2_2.sum(axis = 0)#collapse the expected background counts into a single array
-        theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
-        theta_background = array([theta_background])#prepare background for repeat
-        theta_background_matrix = theta_background.repeat(W,axis=0)
-            #save current parameters
-        """fractions[n] = lambda_motif
-            pwms[n] = theta_motif
-            backgrounds[n] = theta_background
-            fractions_sum = fractions_sum + lambda_motif
-            pwms_sum = pwms_sum + theta_motif
-            backgrounds_sum = backgrounds_sum + theta_background_matrix
-        """
-        #fractions[n] = lambda_motif
-        #distances[n] = dist(theta_motif,firstmotif)
-            #pwms.append(theta_motif)
-            #backgrounds.append(theta_background)
-            #if n > nstart, then start using averaged parameters for the upcoming E-step
-            #have to repeat the normalization to ensure probability is properly conserved
-        """if n > nstart:
-            lambda_motif = mean(fractions[n/2:n],axis=0)#new fraction is mean of previous fractions
-            theta_motif = mean(pwms[n/2:n],axis=0)#new pwm is mean of previous pwms
+    pwm_deque = deque(maxlen=100)
+    for ps in range(5):
+        for seqindpair in seqindpairs:#iterate through each sequence index and start pair
+            seqind = seqindpair[0]
+            start = seqindpair[1]
+            step = g0*pow(n+1,g1)#the online step size. For OLO6a
+            I = Is[seqind][start]#grab the current indicator matrix
+            Z = Z0_I(I,theta_motif, theta_background_matrix,lambda_motif, fudgefactor)#perhaps implement RC better here?
+            this_strand = True
+            if revcomp:#if the user wants reverse complements
+                Ir = I_rc(I)
+                Zr = Z0_I(Ir,theta_motif, theta_background_matrix,lambda_motif, fudgefactor)
+                if Zr > Z:
+                    Z = Zr
+                    I = Ir
+                    this_strand = False#opposite strand strong, use reverse complement
+            ds1_1 = Z
+            I = I + Bmu
+            ds1_2 = ds1_1*I
+            ds2_2 = (1-ds1_1)*I
+            s1_1 = s1_1 + step*(ds1_1 - s1_1)
+            s1_2 = s1_2 + step*(ds1_2 - s1_2)
+                #print s1_2
+            s2_2 = s2_2 + step*(ds2_2 - s2_2)
+                #M-step
+            lambda_motif = s1_1
+            theta_motif = s1_2# + step*Bmu
             theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
-            theta_background = mean(backgrounds[n/2:n],axis=0)#new background is mean of previous backgrounds
+
+            theta_background = s2_2.sum(axis = 0)#collapse the expected background counts into a single array
             theta_background = theta_background/theta_background.sum()#divide by the total counts to normalize to 1
-                #theta_background = array([theta_background])#prepare background for repeat
+            theta_background = array([theta_background])#prepare background for repeat
             theta_background_matrix = theta_background.repeat(W,axis=0)
-            
-                lambda_motif = fractions_sum/(n+1)
-                theta_motif = pwms_sum/(n+1)
-                theta_motif = theta_motif/theta_motif.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
-                theta_background_matrix = backgrounds_sum/(n+1)
-                theta_background_matrix = theta_background_matrix/theta_background_matrix.sum(axis=1)[:,newaxis]#ensures each row has sum 1, for prob
-            """
+
             #update the counter
-        n = n + 1
+            n = n + 1
+            pwm_deque.append(theta_motif)
             #print n
             #the expected log likelihood, the objective function, based on current parameters
-        #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
-    #print s1_2
-    #x = load('NRF1_Motif.npy')
-    #pylab.plot([dist(x,y) for y in pwms])
-    #plot(fractions)
-    #plot(distances)
-    #show()
-    #save('the_expectations', expectations)
-    return theta_motif, theta_background_matrix, lambda_motif, fractions, distances
-    #E-step, this may be superfluous
-    #Z, c0, c = E(I, theta_motif, theta_background_matrix, lambda_motif)
-    #M-step, this may be superfluous
-    #lambda_motif, theta_motif, theta_background_matrix = M(Z, n, c0, c)
-    """
-    for k in xrange(MAXITER):
-        theta_motif_old = theta_motif#this is the only thing I need to save
-        #E-step
-        Z, c0, c = E(I, theta_motif, theta_background_matrix, lambda_motif)
-        #M-step
-        lambda_motif, theta_motif, theta_background_matrix = M(Z, n, c0, c)
-        if dist(theta_motif, theta_motif_old) < TOL:
+            #expectations.append(expected_LogLikelihood(Is, theta_motif, theta_background_matrix, lambda_motif))#add the expectation of the initial guess
+        print "KLD:",KLD(pwm_deque[0],pwm_deque[-1])
+        if KLD(pwm_deque[0],pwm_deque[-1]) < 1e-6:
+            print "KLD threshold met on pass",ps+1
             break
-    return lambda_motif, theta_motif, theta_background_matrix, k
-    """
-
-"""
-Accepts a list of sequences and sets each sequence in the list into the middle subsequence. Default
-middle 100 letters.
-
-Input:
-seqs - list of sequences
-"""
-def middler(seqs,c=100):
-    w = c/2
-    for i in range(len(seqs)):
-        s = seqs[i]
-        L = len(s)
-        m = L/2
-        s = s[m-w:m+w]
-        seqs[i] = s
-
-"""
-The smooth algorithm from Bailey and Elkan 1993. Constrains the sum of expectations in any window of width W to sum no
-more than 1.
-
-Input:
-Z - a list of expected values. Its length is L - W + 1, where L is the length of the original sequence
-W - the width of the motif
-
-Output:
-Z - the list of expected values normalized so that sums in any window of width W sum to 1 or less 
-"""
-def smooth(Z,W):
-    for offset in range(W):
-        for j in range(offset, len(Z) - W + 1, W):
-            local = Z[j:j+W]
-            localp = sum(local)
-            if localp > 1:
-                Z[j:j+W] = [l/localp for l in local]
-
-"""
-Similar to DREME's output_best_re function. Returns the best RE and number of sequence occurrences
-in positive and negative set. 
-
-Input:
-re_pvalues - dictionary of p-values for all REs
-pos_seqs - list of strings, positive sequence set
-unerased_pos_seqs - list of strings, the original unerased positive sequence set
-unerased_neg_seqs - list of strings, the original unerased negative sequence set
-minw - minumum short motif width (default: 3)
-maxw - maximum short motif width (default: 8)
-ethresh - E-value threshold (default: 0.05)
-log_add_pthresh - log10 of the p-value threshold in order to add to RE (default: log(0.01))
-given_only - whether to search on negative strand (default: False)
-
-Output:
-best_re - RE object, the best RE found
-pos - number of sequences in the positive set the best RE was found in
-neg - number of sequences in the negative set the best RE was found in
-best_log_pvalue - p-value of the best RE found
-best_log_Evalue - E-value of the best RE found
-unerased_log_Evalue - E-value of the best RE found using the unerased sequence sets
-"""
-def get_best_re(re_pvalues, pos_seqs, unerased_pos_seqs, unerased_neg_seqs, minw, maxw, ethresh, 
-        log_add_pthresh, given_only):
-    # get the best RE (lowest p-value) within width range
-    candidates = [(re_pvalues[re][4], re) for re in re_pvalues if len(re)>=minw and len(re)<=maxw]
-    if len(candidates) == 0:
-        return("", "", 1e300, 1e300, 1e300)
-    best_re = min(candidates)[1]
-    r = re_pvalues[best_re]
-    # used to allow 6 for consensus sequences but they shouldn't be created
-    assert(len(r) == 5)
-    pos = r[0]
-    neg = r[2]
-    best_log_pvalue = r[4]
-    best_log_Evalue = best_log_pvalue + log(len(re_pvalues))
-    # get the E-value if there had been no erasing
-    unerased_log_pvalue = dre.compute_exact_re_enrichment(best_re, unerased_pos_seqs, 
-           unerased_neg_seqs, given_only)
-    unerased_log_Evalue = unerased_log_pvalue[4] + log(len(re_pvalues))
-    """
-    # output the motif if significant
-    if best_log_Evalue <= log(ethresh):
-        pwm = make_pwm_from_re(best_re, pos_seqs, given_only=given_only)
-        # disable timeout as now printing
-        disable_timeout()
-        # print the best RE
-        write_xml_motif(xml_out, motif_num, best_re, pos, neg,
-                best_log_pvalue, best_log_Evalue, unerased_log_Evalue, pwm, 
-                get_matching_significant_components(best_re, re_pvalues, 
-                        log_add_pthresh));
-        # output a logo
-        logo_out.output_logo(pwm, motif_num, best_re, False)
-        # make rc motif
-        pwm_rc = copy.deepcopy(pwm).reverseComplement()
-        # output a logo
-        logo_out.output_logo(pwm_rc, motif_num, get_rc(best_re), True)
-    """
-    return (best_re, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue)
-
-"""
-Similar to DREME's find_print function. Searches the sequences for the most significant RE.
-Uses the default parameters from DREME.
-
-Adapted from DREME.py by T. Bailey.
-
-Input:
-pos_seqs - list of strings, positive sequence set
-neg_seqs - list of strings, negative sequence set
-unerased_pos_seqs - list of strings, the original unerased positive sequence set
-unerased_neg_seqs - list of strings, the original unerased negative sequence set
-ngen - beam width for generalization (default: 100)
-nref - beam width for refinement (default: 1)
-minw - minimum short motif width (default: 3)
-maxw - maximum short motif width (default: 8)
-mink - minimum width of core (default: 3)
-maxk - maximum width of core (default: 8)
-ethresh - E-value threshold (default: 0.05)
-log_add_pthresh - log10 of the p-value threshold in order to add to RE (default: log(0.01))
-given_only - whether to search on negative strand (default: False)
-use_consensus - whether to convert REs longer than <maxk> to consensus sequence and refine (default: False)
-
-Output:
-best_word - RE object, the best RE found
-pos - number of sequences in the positive set the best RE was found in
-neg - number of sequences in the negative set the best RE was found in
-best_log_pvalue - p-value of the best RE found
-best_log_Evalue - E-value of the best RE found
-unerased_log_Evalue - E-value of the best RE found using the unerased sequence sets
-"""
-def find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs, ngen=100, nref=1, minw=3, maxw=8, 
-        mink=3, maxk=8, log_add_pthresh=log(0.01), ethresh=0.05, use_consensus=False, given_only=False):
-    """
-    Find a motif, print it, erase it.
-    """
-    #
-    # Find core REs.
-    #
-    re_pvalues = dre.re_find_cores(pos_seqs, neg_seqs, ngen, mink, maxk, 
-            log_add_pthresh, given_only)
-
-    #
-    # Extend core REs to maximum width by finding new cores in flanking regions.
-    #
-    if (maxw > maxk):
-        dre.re_extend_cores(re_pvalues, ngen, mink, maxk, maxw, log_add_pthresh, 
-                nref, use_consensus, pos_seqs, neg_seqs, given_only)
-
-    #
-    # Print the best word
-    #
-    (best_word, pos, neg, best_pvalue, best_Evalue, unerased_log_Evalue) = \
-            get_best_re(re_pvalues, pos_seqs, unerased_pos_seqs, unerased_neg_seqs, minw, maxw, 
-                ethresh, log_add_pthresh, given_only)
-    _pv_format = "%3.1fe%+04.0f"
-    rc_best_word = dre.get_rc(best_word)
-    pv_string = dre.sprint_logx(best_pvalue, 1, _pv_format)
-    ev_string = dre.sprint_logx(best_Evalue, 1, _pv_format)
-    unerased_ev_string = dre.sprint_logx(unerased_log_Evalue, 1, _pv_format)
-    print(("Best RE was {0:s} {1:s} p-value= {2:s} E-value= {3:s} "
-               "Unerased_E-value= {4:s}").format(best_word, rc_best_word, 
-                        pv_string, ev_string, unerased_ev_string))
-
-    return (best_word, pos, neg, best_pvalue, best_Evalue, unerased_log_Evalue)
-
-"""
-Equation 47. Used for evaluation in the bisection method to find the roots of
-the function.
-
-Input:
-m - the value to evaluate the function at
-gamma - the user-defined fraction of entropy. default:0.1
-
-Output:
-Evaluated function
-"""
-def objFunction(m,gamma):
-    L = 4.0
-    p = 1/L
-    return (1-m)*log((1-m)/(L-1)) - log(p) + m*log(m) + gamma*log(p)
-
-"""
-Bisection method to solve the equation for m.
-
-Input:
-gamma - used defined fraction of entropy. default:0.1
-a - initial guess for left boundary
-c - initial guess for right boundary
-tol - tolerance for difference between boundaries
-nmax - max number of iterations
-
-Output:
-b - the root
-"""
-def bisection(gamma,a,c,tol=10^-6,nmax=100):
-    n = 0
-    while n < nmax:
-        b = (a+c)/2
-        f = objFunction(b,gamma)
-        if (f == 0 or (c-a)/2 < tol):
-            break
-        if sign(f) == sign(objFunction(a,gamma)):
-            a = b
         else:
-            c = b
-        n = n + 1
-    return b
+            print "KLD threshold not met. Doing another pass"
+            g1 = (g1-1)/2
+            #if lambda_motif*N < minsites or lambda_motif*N > maxsites:
+            #    print lambda_motif*N
+            #    print "But it probably was a bad run anyways, so break loop"
+                #break
+    return theta_motif, theta_background_matrix, lambda_motif
 
 
 
 """
-Equations 45-47. Finds the initial position weight matrix to use as a starting point, given a
-sampled subsequence. Because the value of m is constant reused, it is pre-calculated.
-
-Input:
-I - the sampled indicator matrix to be converted to a starting point
-m - the value derived from the bisection method
-
-Output:
-theta_motif_guess - the starting point derived from I
-"""
-def startingPoint(I, m):
-    a = m*I
-    b = (1.0-m)/(4.0-1)*(I==False)
-    theta_motif_guess = a+b
-    return theta_motif_guess
-
-"""
-Generates a starting point by finding a sequence containing the core RE and follows the
-heuristic in Bailey and Elkan to generate a starting point from the subsequence centered
-on the instance of the core RE. Searches both strands.
-
-Input:
-core_re - RE of the motif core to search for in the sequences
-pos_seqs - list of strings, the positive set of sequences
-W - width of the pwm to generate
-given_only - whether to search on both strands (default: False)
-
-Output:
-theta_motif - numpy array, the pwm generated from a subsequence containing the core motif
-"""
-def generate_starting_point(core_re, pos_seqs, W, given_only=False):
-    ms = dre.make_dna_re(core_re, given_only)#make a regular expression for both strands
-    m = bisection(0.4,0.25,1)
-    #search through each sequence until find a match far enough from the edges
-    #search randomly
-    inds = range(len(pos_seqs))
-    random.shuffle(inds)
-    for ind in inds:
-        s = pos_seqs[ind]
-        a = ms.search(s)#search sequence for RE
-        if a:#if the sequence contains the RE
-            L = len(s)
-            (start, end) = a.span()
-            core_width = end - start#width of the core found
-            padding = (W - core_width)/2#padding to add to both sides (rounded down)
-            extra = W - padding - padding - core_width#just in case
-            start = start - padding - extra
-            end = end + padding
-            if start >= 0 and end <= L:#check if starting point is actually inside sequence
-                b = s[start:end]
-                if 'N' not in b:#no deleted sequences please
-                    return startingPoint(sequenceToI(b), m)
-                
-"""
-Generates a list of starting points by finding sequences containing the core RE and follows the
-heuristic in Bailey and Elkan to generate a starting point from the subsequence centered
-on the instance of the core RE. Searches both strands. Pads sides until reached desired width W.
-Does both core centered and core in 5' quartile. Returns 'tries' number for both centered and 
-off-centered, or until end of sequences reached. Centered and off-centered are placed next
-to each other so a starting point is only added if both can fit.
-
-Input:
-core_re - RE of the motif core to search for in the sequences
-pos_seqs - list of strings, the positive set of sequences
-W - width of the pwm to generate
-tries - 
-given_only - whether to search on both strands (default: False)
-
-Output:
-theta_motif - numpy array, the pwm generated from a subsequence containing the core motif
-"""
-def generate_starting_points(core_re, pos_seqs, W, tries, given_only=False):
-    ms = dre.make_dna_re(core_re, given_only)#make a regular expression for both strands
-    m = bisection(0.4,0.25,1)
-    #search through each sequence until find a match far enough from the edges
-    #search randomly
-    inds = range(len(pos_seqs))
-    random.shuffle(inds)
-    starting_points = list()#list of starting points
-    for ind in inds:
-        s = pos_seqs[ind]
-        a = ms.search(s)#search sequence for RE
-        if a:#if the sequence contains the RE
-            L = len(s)
-            (start, end) = a.span()
-            core_width = end - start#width of the core found
-            padding = (W - core_width)/2#padding to add to both sides (rounded down)
-            extra = W - padding - padding - core_width#just in case
-            start1 = start - padding - extra
-            end1 = end + padding
-            #for the left off-centered padding
-            total_padding = W - core_width
-            left_padding = total_padding*3/4
-            right_padding = total_padding*1/4
-            extra = W - left_padding - right_padding - core_width#just in case
-            start2 = start - left_padding - extra
-            end2 = end + right_padding
-            #for the right off-centered padding, recycling variables from above
-            start3 = start - right_padding
-            end3 = end + left_padding + extra
-            if start1 >= 0 and end1 <= L and start2 >= 0 and end2 <= L and start3 >= 0 and end3 <= L:#check if starting point is actually inside sequence
-                b = s[start1:end1]
-                c = s[start2:end2]
-                d = s[start3:end3]
-                if 'N' not in b and 'N' not in c and 'N' not in d:#no deleted sequences please
-                    print "Generating starting point from subsequences:"
-                    print b
-                    print c
-                    print d
-                    starting_points.append(startingPoint(sequenceToI(b), m))
-                    starting_points.append(startingPoint(sequenceToI(c), m))
-                    starting_points.append(startingPoint(sequenceToI(d), m))
-                    tries -= 1
-                    if tries == 0:
-                        break
-    return starting_points
-
-"""
-The main EXTREME algorithm.
+A modified version of the extreme algorithm. It uses PFMs from a database such as JASPAR
+or the UW ENCODE group, and the predicted number of sites, as seeds.
 
 Input:
 Y, list of strings. dataset of sequences
-Wmin, minimum width of motifs to search for
-Wmax, maximum width of motifs to search for
-NPASSES, number of distinct motifs to search for
-ethresh, threshold for E-value to save a motif
-rthresh, threshold for relative entropy to trim
+minsites, the minimium number of sites
+maxsites, the maximum number of sites. If 0, it is automatically changed to 5 times the number of predicted sites
+pwm_guess, the PFM of the initial guess
+tries, number of different "fudge factors"/bias factors to try before giving up
 Output:
 fractions
 """
-def extreme(Y,Wmin,Wmax,NPASSES,ethresh,rthresh,tries=10,fudgefactor=1.0,revcomp=True):
+def extreme(Y,neg_seqs,minsites,maxsites,pwm_guess,tries=15,revcomp=True):
     #6/28/13, check with initial conditions matching solution
     #p = Pool(64)
     #s=p.map(functools.partial(f,y=Y),range(64))
     #print s
     BIGLOG = log(sys.float_info.max)
-    log_ethresh = log(ethresh)
     pos_seqs = Y
-    print "Grabbing middle sequences..."
-    middler(pos_seqs)
-    print "Shuffling positive sequences..."
-    neg_seqs = [ dre.shuffle.dinuclShuffle(s) for s in pos_seqs ]#generate the negative sequence set by shuffling
-    unerased_pos_seqs = copy.deepcopy(pos_seqs)
-    unerased_neg_seqs = copy.deepcopy(neg_seqs)
     _dna_alphabet = 'ACGT'
     #The discovered motifs and results to be reported
     discovered_lambda_motifs = list()
     discovered_theta_motifs = list()
     discovered_theta_background_matrices = list()
-    discovered_fractionses = list()
-    discovered_distanceses = list()
     discovered_logevs = list()
+    discovered_nonoverlapsites = list()
     #All motifs and results to be reported
     all_lambda_motifs = list()
     all_theta_motifs = list()
     all_theta_background_matrices = list()
-    all_fractionses = list()
-    all_distanceses = list()
     all_logevs = list()
-    for npass in range(NPASSES):
-        dprobs = dre.get_probs(neg_seqs, _dna_alphabet)
-        #generate first order Markov background based on nucleotide frequencies
-        theta_background = array([[dprobs['A'], dprobs['C'], dprobs['G'], dprobs['T']]])
-        #lists to hold the motifs and results in this round
-        lambda_motifs = list()
-        theta_motifs = list()
-        theta_background_matrices = list()
-        fractionses = list()
-        distanceses = list()
-        logevs = list()
-        #Use DREME to find a core seed
-        (best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
-            find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
-        print str(pos) + ' positive sites'
-        print str(neg) + ' negative sites'
-        W = Wmin
-        while W <= Wmax:
-            print 'Using starting point from DREME PWM generation...'
-            #n = sum([max(0,len(y) - W + 1) for y in Y])#gets number of subsequences
-            X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
-            #subsequences are grouped by sequences for normalization purposes
-            Is = [[sequenceToI(xij) for xij in xi] for xi in X]#list of indicator matrices for this specific W, same dimensions as X    
-            #Valid sequence and subsequence index combinations to search. 
-            #subsequences with deleted base pairs will yield a None indicator matrix, which will be ignored in this list
-            seqindpairs = [[(seqind,subseqind) for subseqind in xrange(len(Is[seqind])) if Is[seqind][subseqind] is not None] for seqind in xrange(len(Is))]
-            seqindpairs = list(chain(*seqindpairs))
-            n = len(seqindpairs)#total number of subsequences
+    dprobs = dre.get_probs(neg_seqs, _dna_alphabet)
+    #generate first order Markov background based on nucleotide frequencies
+    print 'Getting background model'
+    theta_background = array([[dprobs['A'], dprobs['C'], dprobs['G'], dprobs['T']]])
+    #print theta_background
+    #lists to hold the motifs and results in this round
+    lambda_motifs = list()
+    theta_motifs = list()
+    theta_background_matrices = list()
+    fractionses = list()
+    distanceses = list()
+    logevs = list()
+    DQ = pwm_guess
+    W = DQ.shape[0]
+    #print 'Using starting point from DREME PWM generation...'
+    #n = sum([max(0,len(y) - W + 1) for y in Y])#gets number of subsequences
+    print 'Getting subsequences'
+    X = getSubsequences(Y,W)#this step may need to be removed for Online to save RAM
+    #subsequences are grouped by sequences for normalization purposes
+    print 'Getting indicator matrices'
+    Is = [[sequenceToI(xij) for xij in xi] for xi in X]#list of indicator matrices for this specific W, same dimensions as X    
+    DR = theta_background.repeat(DQ.shape[0],axis=0)#the initial guess for background is uniform distribution
+    print "Scanning sequence with current PWM guess"
+    pos = guess_positive_sites(DQ, DR, Is)
+    print "Guessing",pos,"sites"
+    #print "Found",pos,"consensus sequence matches in the positive sequences"
+    #print "Found",neg,"consensus sequence matches in the negative sequences"
+    if maxsites == 0:
+        maxsites = pos*5
+        print "Maximum number of sites not specified, so setting it to",maxsites
+    #Valid sequence and subsequence index combinations to search. 
+    #subsequences with deleted base pairs will yield a None indicator matrix, which will be ignored in this list
+    seqindpairs = [[(seqind,subseqind) for subseqind in xrange(len(Is[seqind])) if Is[seqind][subseqind] is not None] for seqind in xrange(len(Is))]
+    seqindpairs = list(chain(*seqindpairs))
+    n = len(seqindpairs)#total number of subsequences
+    random.shuffle(seqindpairs)
+    #The bounds for the fudge factor
+    a = 0.0
+    b = 1.0
+    c = 1.0
+    for t in range(tries):
+        print 'Try ' + str(t + 1)
+        print 'Using a fudge factor of ' + str(b)
+        fudgefactor = b
+        theta_motif = DQ
+        lambda_motif = 1.0*pos/n#guess twice the number regular expression matches
+        theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
+        theta_motif, theta_background_matrix, lambda_motif = Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor, minsites, maxsites)
+        print 'Finding number of motif sites'
+        if lambda_motif < 1e-9:
+            nsites_dis = 0
+        else:
+            nsites_dis = get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is)
+        print 'Found ' + str(nsites_dis) + ' sites'
+        #if there are too many discovered sites, something is wrong, so assign a high E-value
+        shouldIBreak = False
+        if nsites_dis > maxsites:#for now, assume problem if more than 10 instances per sequence
+            print 'Too many sites found. Setting log E-value to max value. Lowering fudge factor and reshuffling'
+            logev = BIGLOG
+            c = b
+            b = mean([a,b])
             random.shuffle(seqindpairs)
-            print 'Generating starting points from subsequences'
-            starting_points = generate_starting_points(best_word, pos_seqs, W, tries)
-            #for t in range(tries):#right now NPASSES is number of tries per width
-            t = 0
-            for theta_motif in starting_points:
-                print 'Try ' + str(t + 1) + ' for width ' + str(W)
-                t += 1
-                #From DREME's best re, predict the fraction 
-                if revcomp:
-                    lambda_motif = 1.0*pos/n*2#multiply by 2 to account for other seqs
-                else:
-                    lambda_motif = 1.0*pos/n/2*2#dividing by 2 accounts for the fact that RC not accounted for
-                #From the best RE, search the positive sequence set and generate a starting PWM
-                #print 'Generating starting point from subsequences'
-                #theta_motif = generate_starting_point(best_word, pos_seqs, W)
-                #theta_motif = load('NRSF_test.npy')
-                theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
-                theta_motif, theta_background_matrix, lambda_motif, fractions, distances = Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor)
-                #print theta_motif
-                if lambda_motif > 10.0*len(Y)/n:
-                    print 'Fraction is too high. Setting log E-value to max value'
-                    print 'Motif E-value exceeded threshold. Trying again...'
-                    #save the failed result
-                    logev = BIGLOG
-                    all_logevs.append(logev)
-                    all_lambda_motifs.append(lambda_motif)
-                    all_theta_motifs.append(theta_motif)
-                    all_theta_background_matrices.append(theta_background_matrix)
-                    all_fractionses.append(fractions)
-                    all_distanceses.append(distances)
-                    continue
-                if lambda_motif < 10.0/n:
-                    print 'Fraction is too low. Setting log E-value to max value'
-                    print 'Motif E-value exceeded threshold. Trying again...'
-                    #save the failed result
-                    logev = BIGLOG
-                    all_logevs.append(logev)
-                    all_lambda_motifs.append(lambda_motif)
-                    all_theta_motifs.append(theta_motif)
-                    all_theta_background_matrices.append(theta_background_matrix)
-                    all_fractionses.append(fractions)
-                    all_distanceses.append(distances)
-                    continue
-                print 'Finding number of motif sites'
-                nsites_dis = get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is)
-                print 'Found ' + str(nsites_dis) + ' sites'
-                #if there are too many discovered sites, something is wrong, so assign a high E-value
-                if nsites_dis > 10*len(Y):#for now, assume problem if more than 10 instances per sequence
-                    print 'Too many sites found. Setting log E-value to max value'
-                    logev = BIGLOG
-                elif nsites_dis < 10:
-                    print 'Less than 10 sites discovered. Setting log E-value to max value'
-                    logev = BIGLOG
-                else:    
-                    mm = me.MEME(theta_motif, theta_background_matrix[0], lambda_motif, Y, nsites_dis)
-                    print 'Calculating log E-value'
-                    mm.calc_ent()
-                    logev = mm.get_logev()
-                    print 'Log E-value: ' + str(logev)
-                    #as of 9/9/13, removed trimming
-                    #rentropy = mm.get_rentropy()
-                    #trim PWM
-                    #theta_motif = trim_PWM(theta_motif, rentropy, rthresh)
-                    #trim the background matrix to same size
-                    #theta_background_matrix = theta_background_matrix[0:theta_motif.shape[0],:]
-                if logev < log_ethresh:#if valid motif, save it
-                    print 'Motif E-value less than threshold. Saving...'
-                    logevs.append(logev)
-                    lambda_motifs.append(lambda_motif)
-                    theta_motifs.append(theta_motif)
-                    theta_background_matrices.append(theta_background_matrix)
-                    fractionses.append(fractions)
-                    distanceses.append(distances)
-                    #break#break current loop and move onto next width
-                else:
-                    print 'Motif E-value exceeded threshold. Trying again...'
-                #save everything
-                all_logevs.append(logev)
-                all_lambda_motifs.append(lambda_motif)
-                all_theta_motifs.append(theta_motif)
-                all_theta_background_matrices.append(theta_background_matrix)
-                all_fractionses.append(fractions)
-                all_distanceses.append(distances)
-            W = int(round(W*sqrt(2)))
-        #went through all widths, now pick motif with best E-value
-        #if no valid motif found, then exit
-        if len(logevs) == 0:
-            print 'No motif found, so just deleting core binding site...'
-            dre.erase_re(best_word, pos_seqs, neg_seqs)
-            continue
-        best_index = argmin(logevs)
-        best_theta_motif = theta_motifs[best_index]
-        best_theta_background_matrix = theta_background_matrices[best_index]
-        best_lambda_motif = lambda_motifs[best_index]
-        best_fractions = fractionses[best_index]
-        best_distances = distanceses[best_index]
-        best_logev = logevs[best_index]
-        print "Using PWM with log EV: " + str(best_logev)
-        discovered_lambda_motifs.append(best_lambda_motif)
-        discovered_theta_motifs.append(best_theta_motif)
-        discovered_theta_background_matrices.append(best_theta_background_matrix)
-        discovered_fractionses.append(best_fractions)
-        discovered_distanceses.append(best_distances)
-        discovered_logevs.append(best_logev)
-        #erase motif sites from positive and negative sequences
-        erase_motif(best_theta_motif, best_theta_background_matrix, best_lambda_motif, pos_seqs, neg_seqs)
-    #9/10/13 Removed the extra DREME step for timing purposes
-    #(best_word, pos, neg, best_log_pvalue, best_log_Evalue, unerased_log_Evalue) = \
-    #        find_dreme_core(pos_seqs, neg_seqs, unerased_pos_seqs, unerased_neg_seqs)
-    #print str(pos) + ' positive sites'
-    #print str(neg) + ' negative sites'
-    #return discovered_theta_motifs, discovered_theta_background_matrices, discovered_lambda_motifs, \
-    #    discovered_fractionses, discovered_distanceses, discovered_logevs
-    return all_theta_motifs, all_theta_background_matrices, all_lambda_motifs, \
-        all_fractionses, all_distanceses, all_logevs, discovered_theta_motifs, discovered_logevs
+        elif nsites_dis < minsites:
+            print 'Not enough sites found. Setting log E-value to max value. Raising fudge factor and reshuffling'
+            logev = BIGLOG
+            a = b
+            b = mean([b,c])
+            random.shuffle(seqindpairs)
+        else:
+            shouldIBreak = True
+            print 'Motif has an acceptable number of sites'    
+            try:
+                import meme as me
+                mm = me.MEME(theta_motif, theta_background_matrix[0], lambda_motif, Y, nsites_dis)
+                print 'Calculating log E-value'
+                mm.calc_ent()
+                logev = mm.get_logev()
+                print 'Log E-value: ' + str(logev)
+            except ImportError:
+                print "You did not install the MEME Cython wrapper, so the E-value will be set to the largest possible value"
+                logev = BIGLOG
+            logevs.append(logev)
+            lambda_motifs.append(lambda_motif)
+            theta_motifs.append(theta_motif)
+            theta_background_matrices.append(theta_background_matrix)
+        #save everything
+        all_logevs.append(logev)
+        all_lambda_motifs.append(lambda_motif)
+        all_theta_motifs.append(theta_motif)
+        all_theta_background_matrices.append(theta_background_matrix)
+        if shouldIBreak:
+            break
+    #went through all tries or found a motif with acceptable number of sites
+    #if no valid motif found, then exit
+    if len(logevs) == 0:
+        print 'No motif found, so do nothing...'
+    best_index = argmin(logevs)
+    best_theta_motif = theta_motifs[best_index]
+    best_theta_background_matrix = theta_background_matrices[best_index]
+    best_lambda_motif = lambda_motifs[best_index]
+    best_logev = logevs[best_index]
+    print "Using PWM with log EV: " + str(best_logev)
+    discovered_lambda_motifs.append(best_lambda_motif)
+    discovered_theta_motifs.append(best_theta_motif)
+    discovered_theta_background_matrices.append(best_theta_background_matrix)
+    discovered_logevs.append(best_logev)
+    pos_nsites, neg_nsites = erase_motif(best_theta_motif, best_theta_background_matrix, best_lambda_motif, pos_seqs, neg_seqs)
+    discovered_nonoverlapsites.append(pos_nsites)
+    return all_theta_motifs, all_theta_background_matrices, all_lambda_motifs, all_logevs, \
+        discovered_theta_motifs, discovered_logevs, discovered_nonoverlapsites
+
 
 """
-Return a trimmed PWM such that the outer columns below the threshold are removed.
+For guesssing the number of motif matches for the initial lambda_m. Calculates
+goodness-of-fit score, G, for each subsequence (or rather, indicator matrix)
+and checks whether G exceeds the threshold (default: 0.7).
 
-Input:
-theta_motif, the PWM to be trimmed
-rentropy, the relative entropy per column
-rthresh, the threshold
+Input: 
+theta_motif, the PWM (assumed to be trimmed already)
+theta_background_matrix, background frequencies, same size as theta_motif
+Is, list of list of indicator matrices
 
 Output:
-trimmed_theta_motif, PWM with trimmed columns
+pos, guess for the number of positive sites
 """
-def trim_PWM(theta_motif, rentropy, rthresh):
-    #find left index
-    left = 0
-    while rentropy[left] < rthresh and left < len(rentropy):
-        left += 1
-    if left == len(rentropy):
-        return None#in case the entire PWM is garbage
-    #find right index
-    right = len(rentropy)
-    while rentropy[right-1] < rthresh and right > left:
-        right -= 1
-    return theta_motif[left:right]
+def guess_positive_sites(theta_motif, theta_background_matrix, Is, Gthresh=0.7):
+    logodds_matrix = log(theta_motif/theta_background_matrix)#spec matrix
+    Vmax = logodds_matrix.max(axis=1).sum()
+    pos = 0
+    for J in Is:
+        for I in J:
+            if I is None:
+                continue
+            G = max(goodness_fit(logodds_matrix, Vmax, I),goodness_fit(logodds_matrix, Vmax, I_rc(I)))
+            pos += G > Gthresh
+    return pos
+
+
+"""
+Calculates goodness of fit, G.
+
+Input:
+logodds_matrix, the log odds matrix
+I, an indicator matrix for a subsequence
+Vmax, maximum log-odd score
+
+Output:
+G - the goodness of fit
+"""
+def goodness_fit(logodds_matrix, Vmax, I):
+    V = sum(logodds_matrix*I)
+    G = V/Vmax
+    return G
 
 """
 Searches for motif instances in the positive and negative sequences and replaces
@@ -1013,6 +541,7 @@ def erase_motif(theta_motif, theta_background_matrix, lambda_motif, pos_seqs, ne
                 j += 1
         neg_seqs[i] = s#done erasing, store result
     print 'Erased ' + str(neg_nsites_dis) + ' sites from the negative sequences'
+    return (pos_nsites_dis, neg_nsites_dis)
 
 
 """
@@ -1054,7 +583,8 @@ def get_nsites_dis(theta_motif, theta_background_matrix, lambda_motif, Is, revco
             else:
                 a = sum(spec*I) > t
             nsites_dis += a
-    return nsites_dis    
+    return nsites_dis
+
 """
 Outputs the motif as a web logo. Saves fractions as .npy.
 
@@ -1062,14 +592,11 @@ Input:
 lambda_motif - a double, fraction of subsequences 
 theta_motif - a numpy array, the PWM
 theta_background_matrix - a numpy array, the background model
-fractions - list of fractions at each step
-distanceses - list of distances from the starting point
 logev - log E-value of motif
 k - the motif number index
 outstr - the prefix for the output files
 """
-def outputMotif(theta_motif, theta_background_matrix, lambda_motif, fractions, distances, logev, k, outstr):
-    from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, eps_formatter, unambiguous_dna_alphabet
+def outputMotif(theta_motif, theta_background_matrix, lambda_motif, logev, k, outstr):
     _pv_format = "%3.1fe%+04.0f"
     f_string = dre.sprint_logx(log(lambda_motif), 1, _pv_format)
     g_string = dre.sprint_logx(logev, 1, _pv_format)
@@ -1087,30 +614,18 @@ def outputMotif(theta_motif, theta_background_matrix, lambda_motif, fractions, d
     fout = open(outstr + "Motif_" + str(k) + '.eps', 'w')
     eps_formatter(data, forma, fout)
     fout.close()
-    #print 'Saving fractions list'
-    #save(outstr + "Fractions_" + str(k), fractions)
-    #print 'Saving distances list'
-    #save(outstr + "Distances_" + str(k), distances)
-    #print 'Saving PWM'
-    #save(outstr + "PWM_" + str(k), theta_motif)
-    #img = imread('results.png')
-    #imshow(img)
-    #show()
-    #for now, just print, but will have to output a png later
-    #print lambda_motif
-    #print theta_motif
-    #print theta_background_matrix
-    
 
+    
 """
 Outputs the discovered motifs in the MEME format
 
 Input:
 disc_pwms - list of numpy arrays of the PWMs
 disc_logevs - list of the log E-valus of the discovered motifs
+disc_nsites - list of motif sites
 outpre - the prefix of the output files
 """
-def outputMEMEformat(disc_pwms, disc_logevs, outpre):
+def outputMEMEformat(disc_pwms, disc_logevs, disc_nsites, outpre):
     _pv_format = "%3.1fe%+04.0f"
     f = open(outpre+"MEMEoutput.meme","w")
     f.write("MEME version 4.9.0\n\n")
@@ -1119,13 +634,15 @@ def outputMEMEformat(disc_pwms, disc_logevs, outpre):
     f.write("Background letter frequencies (from uniform background):\n")
     f.write("A 0.25000 C 0.25000 G 0.25000 T 0.25000\n\n")
     n = 1
-    for pwm, logev in zip(disc_pwms, disc_logevs):
+    for pwm, logev, nsites in zip(disc_pwms, disc_logevs, disc_nsites):
         g_string = dre.sprint_logx(logev, 1, _pv_format)
         x = round_(pwm,3)
         w = x.shape[0]
-        y = str(x).replace('[','').replace(']','').replace('  ',' ').replace('1. ','1.000').replace('0. ','0.000')
+        y = str(x).replace('[','').replace(']','').replace('  ',' ').replace('1.  ','1.000').replace('0.  ','0.000').replace('0.\n', '0.000\n').replace('1.\n', '1.000\n').replace('\n  ','\n')[1:]
+        if y[-1] == '.':
+            y += '000'#add zeros at end if there's a hanging non-decimal number
         f.write('MOTIF M' + str(n) + ' O'+str(n)+'\n\n')
-        f.write('letter-probability matrix: alength= 4 w= ' + str(w) + ' nsites= 20 E= ' + g_string +  '\n')
+        f.write('letter-probability matrix: alength= 4 w= ' + str(w) + ' nsites= ' + str(nsites) + ' E= ' + g_string +  '\n')
         f.write(' ' + y)
         f.write('\n\n')
         n += 1
@@ -1136,40 +653,63 @@ The main executable function
 """
 def main():
     usage = "usage: %prog [options] <input FASTA>"
-    description = "The program applies the EXTREME algorithm to find motifs in a FASTA file. This variant is best for finding long motifs in ChIP-Seq data."
+    description = "The program applies a modified EXTREME algorithm to find motifs in a FASTA file. It accepts a positive sequence set, a negative sequence set, a list of seed PFMs, and an index number indicating which of the seed PFMs to use"
     parser = ArgumentParser(description=description)
     parser.add_argument('fastafile', metavar='f', help='FASTA file containing the sequences')
-    parser.add_argument("-p", "--processes", help="optional number of parallelized processes", type=int, default=1)
-    parser.add_argument("-w", "--width", dest="width", help="Width of the motif to search for", type=int, default=0)
-    parser.add_argument("-minw", dest="minwidth", help="Minimum width of the motif to search for", type=int, default=10)
-    parser.add_argument("-maxw", dest="maxwidth", help="Maximum width of the motif to search for", type=int, default=40)
-    parser.add_argument("-m", "--nummotifs", dest="nummotifs", help="Number of motifs to search for", type=int, default=1)
-    parser.add_argument("-t", "--tries", dest="tries", help="Number of tries for each width", type=int, default=10)
-    parser.add_argument("-e", "--ethresh", dest="ethresh", help="E-value threshold. Default: 0.05", type=float, default=0.05)
-    parser.add_argument("-r", "--rthresh", dest="rthresh", help="Relative entropy threshold. Default: 0.1", type=float, default=0.1)
-    parser.add_argument("-f", "--fudge", dest="fudge", help="Fudge factor for short motifs. Default: 1.0", type=float, default=1.0)    
+    parser.add_argument('negfastafile', metavar='g', help='Negative FASTA file. This is for comparison so that you know the motif you discovered is over-represented.')
+    parser.add_argument('jfile', metavar='j', help='File containing PWM seeds')
+    parser.add_argument('indexvalue', metavar='i', help='Which seed from the Minimal MEME Format file to use (it is an integer ranging from 1 to the total number of PFM seeds in your file)', type=int)
+    parser.add_argument("-p", "--pseudocounts", help="Pseudo counts added to initial PFM guess. Default:0.0", type=float, default=0.0)
+    parser.add_argument("-maxsites", dest="maxsites", help="Maximum number of expected sites for the motif. If not specified, defaults to 5 times number of initial predicted sites.", type=int, default=0)
+    parser.add_argument("-minsites", dest="minsites", help="Minimum number of expected sites for the motif. Default: 10", type=int, default=10)
+    parser.add_argument("-t", "--tries", dest="tries", help="Number of tries for each motif discovered. The fudge factor is changed until the number of discovered sites is in the \"acceptable\" range", type=int, default=15)
     parser.add_argument("-s", "--seed", dest="seed", help="Random seed", type=int, default=1)
-    parser.add_argument("-o", "--output", dest="output", help="Folder for all output files", default="output")    
+    parser.add_argument("-saveseqs", "--saveseqs", dest="saveseqs", help="If specified, save sequences to current directory", action='store_true')
+    import time
+    print "Started at:"
+    print time.ctime()
+    starttime = time.time()
     args = parser.parse_args()
     seed = args.seed
+    minsites = args.minsites
+    maxsites = args.maxsites
     random.seed(seed)
-    fudgefactor = args.fudge
-    w = args.width
-    ethresh = args.ethresh
-    rthresh = args.rthresh
-    if w == 0:
-        minw = args.minwidth
-        maxw = args.maxwidth
-    else:
-        minw = w
-        maxw = w
-    nmotifs = args.nummotifs
+    jfile = open(args.jfile,'r')
+    from numpy import fromstring
+    from string import join
+    lines = jfile.readlines()
+    j = 0
+    for i in range(len(lines)):
+        line = lines[i]
+        if '>' in line:#This is a name line, so read in next lines for matrix
+            j += 1
+            if j == args.indexvalue:#at the desired index
+                parts = lines[i].split()
+                pos_cs = parts[1]
+                motifname = parts[0][1:]
+                w = len(pos_cs)
+                strlines = lines[i+1:i+1+w]
+                pwm_string = ''
+                for strline in strlines:
+                    strparts = strline.split()
+                    for strpart in strparts:
+                        pwm_string += strpart + ' '
+                #print pwm_string
+                pwm_guess = fromstring(pwm_string,sep=' ',dtype=float)
+                pwm_guess = pwm_guess.reshape((w,4))
+                break
+    print 'Using initial motif guess',motifname
+    print 'Adding',str(args.pseudocounts),'pseudocounts and normalizing'
+    pwm_guess = pwm_guess + args.pseudocounts
+    pwm_guess = pwm_guess/pwm_guess.sum(axis=1)[:,newaxis]
+    jfile.close() 
+   
     # make the directory (recursively)
     import os
-    outdir = args.output
+    outdir = motifname
     outpre = outdir + "/"
     clobber = True
-    try:
+    try:#adapted from DREME.py by T. Bailey
         os.makedirs(outdir)
     except OSError as exc:
         if exc.errno == errno.EEXIST:
@@ -1177,20 +717,41 @@ def main():
                 print >> sys.stderr, ("output directory (%s) already exists "
                 "but EXTREME was not told to clobber it") % (outdir); sys.exit(1)
         else: raise
-    import time
-    print "Started at:"
-    print time.ctime()
     #Use DREME's SeqIO to read in FASTA to list
     seqs = sequence.convert_ambigs(sequence.readFASTA(args.fastafile, None, True))
+    #print seqs
+    negseqs = sequence.convert_ambigs(sequence.readFASTA(args.negfastafile, None, True))
     tries = args.tries
-    theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs, disc_pwms, disc_logevs = extreme(seqs,minw,maxw,nmotifs,ethresh,rthresh,tries,fudgefactor)
+    theta_motifs, theta_background_matrices, lambda_motifs, logevs, disc_pwms, disc_logevs, disc_nsites = extreme(seqs,negseqs,minsites,maxsites,pwm_guess,tries)
     k = 1
-    outputMEMEformat(disc_pwms, disc_logevs, outpre)
-    for theta_motif, theta_background_matrix, lambda_motif, fractions, distances, logev in zip(theta_motifs, theta_background_matrices, lambda_motifs, fractionses, distanceses, logevs):
-        outputMotif(theta_motif, theta_background_matrix, lambda_motif, fractions, distances, logev, k, outpre)
-        k = k+1
+    outputMEMEformat(disc_pwms, disc_logevs, disc_nsites, outpre)
+    try:
+        from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, eps_formatter, unambiguous_dna_alphabet
+        for theta_motif, theta_background_matrix, lambda_motif, logev in zip(theta_motifs, theta_background_matrices, lambda_motifs, logevs):
+            outputMotif(theta_motif, theta_background_matrix, lambda_motif, logev, k, outpre)
+            k = k+1
+    except ImportError:
+        print "You do not have Weblogolib, so sequence logos will not be made"
+    
+    
+    if args.saveseqs:
+        print "Saving Positive sequences to Positive_seq.fa"
+        pos_file = open("Positive_seq.fa","w")
+        for s in range(len(seqs)):
+            pos_file.write(">sequence"+str(s+1)+"\n")
+            pos_file.write(seqs[s]+"\n")
+        pos_file.close()
+        print "Saving Negative sequences to Negative_seq.fa"
+        neg_file = open("Negative_seq.fa","w")
+        for s in range(len(negseqs)):
+            neg_file.write(">sequence"+str(s+1)+"\n")
+            neg_file.write(negseqs[s]+"\n")
+        neg_file.close()
     print "Ended at:"
     print time.ctime()
+    stoptime = time.time()
+    duration = stoptime - starttime
+    print "Duration:", duration
 
 
 if __name__=='__main__':
