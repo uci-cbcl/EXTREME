@@ -36,7 +36,7 @@ Optional
 
 Install from source
 -------------------
-Download the latest release ([zip] (https://github.com/uci-cbcl/EXTREME/archive/2.0.0.zip) [tar.gz] (https://github.com/uci-cbcl/EXTREME/archive/2.0.0.tar.gz)) and decompress. 
+Download the latest release ([zip] (https://github.com/uci-cbcl/EXTREME/archive/v2.0.zip) [tar.gz] (https://github.com/uci-cbcl/EXTREME/archive/v2.0.tar.gz)) and decompress. 
 
 Optional: If you want to calculate E-values for your motifs, then you need to build Cython bindings to the MEME source files. Keep in mind that Cython and gcc are usually difficult to work with. I have had the best success on a Linux setup. cd into the src folder, and use the following command:
 
