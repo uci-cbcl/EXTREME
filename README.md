@@ -52,12 +52,14 @@ Arguments
 ---------
 
 The following are arguments for GappedKmerSearch.py, the word searching algorithm for the seeding:
-* `-t TRIES`. The number of different bias factors to try before giving up on the current seed.
-* `-s SEED`. Random seed for shuffling sequences and dataset positions.
-* `-p PSEUDOCOUNTS`. Uniform pseudo counts to add to initial PFM guess (default 0.0).
-* `-minsites MINSITES`. Minimum number of sites the motif should have (default 10).
+* `-l HALFLENGTH`. The number of exact letters on each side of the word (default 4).
+* `-ming MINGAP`. The minimum number of universal wildcard letters in the middle (default 0).
+* `-maxg MAXGAP`. The maximum number of universal wildcard letters in the middle (default 10).
+* `-minsites MINSITES`. Minimum number of sites a word should have to be included (default 10).
+* `-zthresh ZTHRESHOLD`. Minimum normalized z-score for a word to be saved. A lower threshold increases the number of words saved (default 5).
 
-The following are arguments 
+The following are arguments for run_consensus_clusering_using_wm.pl, the hierarchical clustering algorithm for the seeding:
+* `THRESHOLD`. The threshold for the clustering. Has values between 0 and 1. A value closer to 1 decreases the number of clusters, while a value closer to 0 increases the number of clusters. Recommended value is 0.3.
 
 
 The following are arguments for EXTREME.py, the EXTREME algorithm:
@@ -73,79 +75,25 @@ Running EXTREME
 ---------------
 An example of running EXTREME using the included NRSF example. cd into the ExampleFiles directory. First, we need to generate some seeds:
 ```
-$ python ../GappedKmerSearch.py -l 8 -ming 33 -m 2 -o outputFolder -t 20 GM12878_NRSF_intersected.fasta.masked
+$ python ../src/fasta-dinucleotide-shuffle.py -f GM12878_NRSF_ChIP.fasta > GM12878_NRSF_ChIP_shuffled.fasta
+$ python ../src/GappedKmerSearch.py -l 8 -ming 0 -maxg 10 -minsites 5 GM12878_NRSF_ChIP.fasta GM12878_NRSF_ChIP_shuffled.fasta GM12878_NRSF_ChIP.words
+$ perl ../src/run_consensus_clusering_using_wm.pl GM12878_NRSF_ChIP.words 0.3
+$ python ../src/Consensus2PWM.py GM12878_NRSF_ChIP.words.cluster.aln GM12878_NRSF_ChIP.wm
+```
+The first line generates a dinucleotide shuffled version of the positive sequence set to serve as a negative sequence set. The second line finds gapped words with two half-sites of length 8, between 0 and 10 universal wildcard gap letters, and at least 5 occurrences in the positive sequence set. The third line clusters the words and outputs the results to GM12878_NRSF_ChIP.words.cluster.aln (run_consensus_clusering_using_wm.pl always outputs results to the input filename with ‘cluster.aln’ appended at the end). The last line converts the clusters into PFMs which can be used as seeds for the online EM algorithm. These PFMs are saved in GM12878_NRSF_ChIP.wm. For your own data, you may need to play around with the parameters to get a good set of seeds.
+
+Now let’s run the online EM algorithm.
+```
+$ python ../src/EXTREME.py GM12878_NRSF_ChIP.fasta GM12878_NRSF_ChIP_shuffled.fasta GM12878_NRSF_ChIP.wm 1
 ```
 
-
-```
-$ cd ExampleFiles
-$ python ../EXTREME.py -minw 23 -maxw 33 -m 2 -o outputFolder -t 20 GM12878_NRSF_intersected.fasta.masked
-```
-The ../ indicates to execute EXTREME.py in the parent folder. Note that EXTREME is fast enough to test many seeds
-and process them to convergence with the online EM algorithm. However, a more thorough search using more seeds
-will linearly increase the running time of EXTREME.
-
-Alternatively, the Python script file can be made an executable:
-```
-$ chmod +x EXTREME.py
-$ cd ExampleFiles
-$ ../EXTREME.py -minw 23 -maxw 33 -m 2 -o outputFolder -t 20 GM12878_NRSF_intersected.fasta.masked
-```
-However, this approach is not always successful. Most motifs are usually shorter and do not work so well with this strategy, such
-as CTCF and NANOG. In cases like these, we recommend using ShortEXTREME.py. Here is an example that uses ShortEXTREME.py
-to discover a motif in the included CTCF dataset. It uses DREME's experimental long regular expression algorithm to discover
-a motif of width 12, and then pads the motif on both sides with 2 universal letters to generate an initial seed of 
-width 16. Results are put into the folder "outputFolder":
-```
-$ cd ExampleFiles
-$ python ../ShortEXTREME.py -minw 3 -maxw 12 -p 2 -m 1 -o outputFolder SKNSHRA_CTCF_intersected.fasta.masked
-```
-Now, this is probably what you came here for. How can you discover a bunch of motifs in footprints simultaneously
-very quickly? First, let's start with searching for one motif. Here is an example where we use the included JASPAR
-database to seed with the CTCF motif.
-```
-$ cd ExampleFiles
-$ ../ParallelFootprintEXTREME.py -p 0.1 K562_footprints_extended5_merged.fasta.masked K562_footprints_extended5_merged_negative.fasta.masked JASPAR_Motif_names JASPAR_PosSites JASPAR_CORE_2009.meme 156
-```
-Unlike the other two flavors, this last flavor has 5 required arguments. The first one is the dataset in FASTA format.
-The second one is a "negative dataset", which we generated by shuffling dinucleotides by using the sequence.py script. We
-require a negative dataset so that users can compare motif instances in positive and negative datasets to decide whether
-a motif is valid.
-The third one is a file containing the motif names in order. The fourth one is a file that lists the number of sites
-discovered using the initial guess. Users can generate their own file like this by using FIMO with a Minimal MEME file
-and a FASTA file. The last argument is an integer, which tells the script which motif to use. The first FASTA file was 
-generated by taking K562 footprints from the ENCODE footprint dataset, extending each footprint by 5 bp, and merging
-all intersecting regions. Unlike the other two variants, you do not get a choice where results are outputted to. Results
-are always put into a folder that shares the name of the motif seed used.
-
-Now, if you want to parallelize this, you will need a cluster with a lot of cores and memory. Here is an example
-in which we go through all 683 seeds in the ENCODE database:
-```
-$ cd ExampleFiles
-$ for i in {1..683}; do
-> qsub -S /bin/bash -q mycluster <<EOF
-> ../ParallelFootprintEXTREME.py -t 15 -p 0.0 K562_footprints_extended5_merged_Round2.fasta.masked K562_footprints_extended5_merged_Round2_negative.fasta.masked ENCODE_Motif_names ENCODE_PosSites_Round2 ENCODE.meme $i
-> EOF
-> done
-```
-Note that in this example, we used 0 pseudo counts, which differs from the default. The "Round2" refers to how we took
-the FASTA file from the previous example and deleted four motif instances and repetitive elements so that the
-EXTREME algorithm can converge onto other motifs.
-
-Here's another example for your amusement:
-```
-$ cd ExampleFiles
-$ for i in {1..683}; do
-> qsub -S /bin/bash -q mycluster <<EOF
-> ../ParallelFootprintEXTREME.py -t 15 -p 0.0 K562_footprints_extended5_merged.fasta.masked K562_footprints_extended5_merged_negative.fasta.masked ENCODE_Motif_names ENCODE_PosSites ENCODE.meme $i
-> EOF
-> done
-```
-
-Note that these last two examples will generate many output folders. You have been warned.
+EXTREME.py uses PFM seeds from GM12878_NRSF_ChIP.wm to initialize the online EM algorithm. The last argument tells EXTREME which of these seeds to use. GM12878_NRSF_ChIP.wm should have 23 PFM seeds, so the last argument can be any value between 1 and 23 in this case. 
 
 Output files
 ------------
+EXTREME.py outputs files to a folder with the same name as seed the online EM algorithm is initialized from. For example, the first seed in
+our NRSF example has the name “cluster1”, so all files will be output to the “cluster1” folder.
+
 **\*/Motif_x.png** PNG output of the x-th motif. Includes all motifs, not just the most significant ones (that is, the final
 result after convergence of any seed).
 
