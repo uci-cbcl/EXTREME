@@ -1,34 +1,44 @@
-README for EXTREME 1.0
+README for EXTREME 2.0
 ========================
 
 EXTREME is an efficient motif discovery algorithm. It applies the online EM algorithm to discover motifs. It uses the same
 model as MEME, representing sequence binding preference as position frequency matricies (PFMs). EXTREME is written in Python,
-and incorporates source code from MEME and DREME (by T. Bailey) and are part of the [MEME Suite](http://meme.nbcr.net/meme/).
+and incorporates source code from MEME and DREME (by T. Bailey), which are part of the [MEME Suite](http://meme.nbcr.net/meme/).
 A paper for EXTREME has been submitted to the journal Bioinformatics: Oxford Journals and is currently under peer review.
 
 
 INSTALL
 =======
 
-Prerequisites
--------------
-* Python (2.7). [Python 2.7.3](http://www.python.org/download/releases/2.7.3/) is recommended.
+Required
+--------
+* [Python 2.7](http://www.python.org/download/releases/2.7.6/).
 
-* [Numpy](http://www.numpy.org/)(>=1.6.1).
+* [Numpy](http://www.numpy.org/).
 
-* [WebLogo] (https://code.google.com/p/weblogo/) (3).
+* [Perl] (http://www.perl.org/).
 
-* [Cython] (http://cython.org).
+* [Java] (http://www.java.com/).
 
-* [gcc] (http://gcc.gnu.org/).
+Optional
+________
 
-Although not required by EXTREME, [bedtools] (https://github.com/arq5x/bedtools/) can be useful for manipulating BED 
-files and generating FASTA files.
+* [WebLogo] (https://code.google.com/p/weblogo/) (3). For generating visual sequence logos in eps and png format.
+
+* [Cython] (http://cython.org). For building C bindings to the MEME source code. This is required if you want to calculate E-values.
+
+* [gcc] (http://gcc.gnu.org/). For compiling C code. Cython needs this.
+
+* [bedtools] (https://github.com/arq5x/bedtools/). Can be useful for manipulating BED files and generating FASTA files. When generating your own FASTA files, we recommend using the masked reference genomes to extract genomic sequences from.
+
+* [MEME suite] (http://meme.nbcr.net/meme/). Has a bunch of useful tools for motifs.
+
 
 Install from source
 -------------------
-Download the compressed source files, cd into the folder, and use the following command to compile the Cython bindings 
-to the MEME source files:
+Download the latest release (zip (https://github.com/uci-cbcl/EXTREME/archive/2.0.0.zip) tar.gz (https://github.com/uci-cbcl/EXTREME/archive/2.0.0.tar.gz)) and decompress. 
+
+Optional: If you want to calculate E-values for your motifs, then you need to build Cython bindings to the MEME source files. Keep in mind that Cython and gcc are usually difficult to work with. I have had the best success on a Linux setup. cd into the src folder, and use the following command:
 
 ```
 $ python setup.py build_ext --inplace
@@ -38,56 +48,35 @@ $ python setup.py build_ext --inplace
 USAGE
 =====
 
-
-Overview
---------
-EXTREME comes in three different flavors:
-
-* `EXTREME.py`. The original EXTREME algorithm. This flavor is best suited for ChIP-Seq datasets for TFs with long
-motifs with high information content such as NRSF. It uses the first seeding strategy which involves generating starting points from
-sequences centered around an instance of the DREME regular expression seed. It includes a preprocessing step
-to trim all sequences to the middle 100 bps.
-
-* `ShortEXTREME.py`. This flavor is best suited for ChIP-Seq datasets for TFs with 
-short motifs such as NANOG or CTCF. Its seeding strategy involves padding the DREME regular expression seed with universal
-letters and then generating a PFM starting point from the nucleotide counts of sequences matching the regular expression.
-It includes a preprocessing set to take the middle 100 nucleotides of all sequences.
-
-* `ParallelFootprintEXTREME.py`. This flavor is best suited for finding motifs in footprint data. It uses the second seeding strategy.
-PFMs are initialized from JASPAR or ENCODE instead of generating one using DREME. We have supplied JASPAR and ENCODE
-databases in Minimal MEME Format for the seeding. It is parallelizable, processing each seed independently with the
-online EM algorithm.
-
-
 Arguments
 ---------
-The following arguments are common to all variants of EXTREME:
 
-* `-t TRIES`. The number of tries of the online EM algorithm before giving up on the current seed.
+The following are arguments for GappedKmerSearch.py, the word searching algorithm for the seeding:
+* `-t TRIES`. The number of different bias factors to try before giving up on the current seed.
 * `-s SEED`. Random seed for shuffling sequences and dataset positions.
+* `-p PSEUDOCOUNTS`. Uniform pseudo counts to add to initial PFM guess (default 0.0).
+* `-minsites MINSITES`. Minimum number of sites the motif should have (default 10).
 
-The following arguments are common to EXTREME.py and ShortEXTREME.py:
-* `-m NUMMOTIFS`. The number of motifs to search for.
-* `-o OUTPUT`. The output folder containing all output files.
-* `-w WIDTH`. The width of a motif to search for. If this value is set, both MINW and MAXW are set to this value.
-* `-minw MINW`. The minimum motif width to search for.
-* `-maxw MAXW`. The maximum motif width to search for. EXTREME.py looks for motifs of widths between MINW and MAXW,
-in increments of sqrt(2). For ShortEXTREME.py, if MAXW is greater than MAXK, it will attempt to generate
-a new regular expression seed at width MAXW using an experimental long regular expression generator in DREME.
+The following are arguments 
 
-The following arguments are unique ShortEXTREME.py:
-* `-mink MINK`. The minimum DREME core width to search for.
-* `-maxk MAXK`. The maximum DREME core width to search for. 
-* `-p PADDING`. The number of universal letters to add to each side of the regular expression seed.
 
-The following arguments are unique ParallelEXTREME.py:
-* `-p PSEUDOCOUNTS`. Uniform pseudo counts to add to initial PFM guess (default 0.1).
+The following are arguments for EXTREME.py, the EXTREME algorithm:
+
+* `-t TRIES`. The number of different bias factors to try before giving up on the current seed.
+* `-s SEED`. Random seed for shuffling sequences and dataset positions.
+* `-p PSEUDOCOUNTS`. Uniform pseudo counts to add to initial PFM guess (default 0.0).
+* `-minsites MINSITES`. Minimum number of sites the motif should have (default 10).
+* `-maxsites MAXSITES`. Minimum number of sites the motif should have. If not specified, it is set to five times the number of predicted motif sites based on the initial PFM guess
+* `-saveseqs SAVESEQS`. A switch. If used, the positive and negative sequence set will be saved to Positive_seq.fa and Negative_seq.fa, respectively, with instances of the discovered motif replaced with capital Ns.
 
 Running EXTREME
 ---------------
-An example of running EXTREME using the included NRSF example. cd into the ExampleFiles directory and run the EXTREME
-algorithm. This particular example searches for 2 motifs of width 23 and width 33 using 20 seeds per width. Results are put 
-into the folder "outputFolder":
+An example of running EXTREME using the included NRSF example. cd into the ExampleFiles directory. First, we need to generate some seeds:
+```
+$ python ../GappedKmerSearch.py -l 8 -ming 33 -m 2 -o outputFolder -t 20 GM12878_NRSF_intersected.fasta.masked
+```
+
+
 ```
 $ cd ExampleFiles
 $ python ../EXTREME.py -minw 23 -maxw 33 -m 2 -o outputFolder -t 20 GM12878_NRSF_intersected.fasta.masked
