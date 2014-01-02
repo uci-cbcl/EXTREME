@@ -639,6 +639,7 @@ k - the motif number index
 outstr - the prefix for the output files
 """
 def outputMotif(theta_motif, theta_background_matrix, lambda_motif, logev, k, outstr):
+    from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, eps_formatter, unambiguous_dna_alphabet
     _pv_format = "%3.1fe%+04.0f"
     f_string = sprint_logx(log(lambda_motif), 1, _pv_format)
     g_string = sprint_logx(logev, 1, _pv_format)
