@@ -73,7 +73,7 @@ The following are arguments for EXTREME.py, the EXTREME algorithm:
 
 Running EXTREME
 ---------------
-An example of running EXTREME using the included NRSF example. cd into the ExampleFiles directory. First, we need to generate some seeds:
+An example of running EXTREME using the included ENCODE GM12878 NRSF ChIP-Seq dataset. cd into the ExampleFiles directory. First, we need to generate some seeds:
 ```
 $ python ../src/fasta-dinucleotide-shuffle.py -f GM12878_NRSF_ChIP.fasta > GM12878_NRSF_ChIP_shuffled.fasta
 $ python ../src/GappedKmerSearch.py -l 8 -ming 0 -maxg 10 -minsites 5 GM12878_NRSF_ChIP.fasta GM12878_NRSF_ChIP_shuffled.fasta GM12878_NRSF_ChIP.words
@@ -88,6 +88,8 @@ $ python ../src/EXTREME.py GM12878_NRSF_ChIP.fasta GM12878_NRSF_ChIP_shuffled.fa
 ```
 
 EXTREME.py uses PFM seeds from GM12878_NRSF_ChIP.wm to initialize the online EM algorithm. The last argument tells EXTREME which of these seeds to use. GM12878_NRSF_ChIP.wm should have 23 PFM seeds, so the last argument can be any value between 1 and 23 in this case. 
+
+We have also included an ENCODE K562 DNase-Seq dataset. Try running EXTREME on your own with this dataset. In our publication, we used the parameters l=4, ming=0, maxg=10, minsites=10, zthresh=5 for the word search portion of the seeding. You can try experimenting with other sets of parameters too.
 
 Output files
 ------------
