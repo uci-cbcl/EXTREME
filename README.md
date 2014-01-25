@@ -12,9 +12,9 @@ INSTALL
 
 Required
 ---------
-* [Python 2.7](http://www.python.org/download/releases/2.7.6/).
+* [Python >= 2.7](http://www.python.org/download/releases/2.7.6/). The majority of the EXTREME algorithm is written in Python. Although these libraries are standard with Python >= 2.7 releases, make sure you have the following libraries available on your setup: argparse, collections, random, copy, errno, sys, itertools, string, math, re, and time. 
 
-* [Numpy](http://www.numpy.org/).
+* [Numpy](http://www.numpy.org/). A standard external Python package for scientific computing.
 
 * [Perl] (http://www.perl.org/).
 
