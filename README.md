@@ -4,7 +4,7 @@ README for EXTREME 2.0
 EXTREME is an efficient motif discovery algorithm. It applies the online EM algorithm to discover motifs. It uses the same
 model as MEME, representing sequence binding preference as position frequency matricies (PFMs). EXTREME is written in Python,
 and incorporates source code from MEME and DREME (by T. Bailey), which are part of the [MEME Suite](http://meme.nbcr.net/meme/).
-A paper for EXTREME has been submitted to the journal Bioinformatics: Oxford Journals and is currently under peer review.
+A paper for EXTREME has been submitted to the journal Bioinformatics: Oxford Journals and is currently under peer review. If you have any more questions you can e-mail me at dxquang@uci.edu.
 
 
 INSTALL
