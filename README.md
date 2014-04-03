@@ -7,6 +7,11 @@ and incorporates source code from MEME and DREME (by T. Bailey), which are part 
 EXTREME is published. You can download an Advance Access version of the paper [here](https://github.com/uci-cbcl/EXTREME/blob/master/AdvanceAccess.pdf). If you have any more questions you can e-mail me at dxquang@uci.edu.
 
 
+Citing EXTREME
+========================
+
+Quang, D., & Xie, X. (2014). EXTREME: an online EM algorithm for motif discovery. Bioinformatics, btu093.
+
 INSTALL
 =======
 
