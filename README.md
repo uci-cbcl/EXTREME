@@ -28,7 +28,7 @@ Required
 Optional
 --------
 
-* [WebLogo] (https://code.google.com/p/weblogo/) (3). For generating visual sequence logos in eps and png format.
+* [WebLogo] (https://weblogo.googlecode.com/files/weblogo-3.3.tar.gz) (3.3). For generating visual sequence logos in eps and png format. Whatever you do, do not download 3.4!
 
 * [Cython] (http://cython.org). For building C bindings to the MEME source code. This is required if you want to calculate E-values.
 
