@@ -233,7 +233,7 @@ theta_motif, motif PWM matrix
 theta_background_matrix, background PWM matrix
 lambda_motif, motif frequency
 """
-def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor, minsites, maxsites, B=0.0001, smoothing=False, revcomp=True):
+def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor, minsites, maxsites, initialstep=0.05, B=0.0001, smoothing=False, revcomp=True):
     W = theta_motif.shape[0]#get the length of the motif
     s1_1 = lambda_motif#the expected number of occurrences of the motif
     s1_2 = theta_motif#the matrix holding the expected number of times a letter appears in each position, motif
@@ -249,7 +249,7 @@ def Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_moti
     firstmotif = theta_motif#for tracking how much the motif changes
     mu = theta_background_matrix#the first background matrix is the average frequencies in the negative set
     Bmu = B*mu#the priors to be added each step
-    g0 = max(0.05,lambda_motif*10)
+    g0 = max(initialstep,lambda_motif*10)
     g1 = -0.6
     print "Initial step size of " + str(g0)
     print "Running Online EM algorithm..."
@@ -321,7 +321,7 @@ tries, number of different "fudge factors"/bias factors to try before giving up
 Output:
 fractions
 """
-def extreme(Y,neg_seqs,minsites,maxsites,pwm_guess,tries=15,revcomp=True):
+def extreme(Y,neg_seqs,minsites,maxsites,pwm_guess,initialstep=0.05,tries=15,revcomp=True):
     #6/28/13, check with initial conditions matching solution
     #p = Pool(64)
     #s=p.map(functools.partial(f,y=Y),range(64))
@@ -387,7 +387,7 @@ def extreme(Y,neg_seqs,minsites,maxsites,pwm_guess,tries=15,revcomp=True):
         theta_motif = DQ
         lambda_motif = 1.0*pos/n#guess twice the number regular expression matches
         theta_background_matrix = theta_background.repeat(theta_motif.shape[0],axis=0)#the initial guess for background is uniform distribution
-        theta_motif, theta_background_matrix, lambda_motif = Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor, minsites, maxsites)
+        theta_motif, theta_background_matrix, lambda_motif = Online_EM(Is, seqindpairs, theta_motif, theta_background_matrix, lambda_motif, fudgefactor, minsites, maxsites, initialstep)
         print 'Finding number of motif sites'
         if lambda_motif < 1e-9:
             nsites_dis = 0
@@ -703,6 +703,7 @@ def main():
     parser.add_argument('jfile', metavar='j', help='File containing PWM seeds')
     parser.add_argument('indexvalue', metavar='i', help='Which seed from the Minimal MEME Format file to use (it is an integer ranging from 1 to the total number of PFM seeds in your file)', type=int)
     parser.add_argument("-p", "--pseudocounts", help="Pseudo counts added to initial PFM guess. Default:0.0", type=float, default=0.0)
+    parser.add_argument("-q", "--initialstep", help="The initial step size for the online EM algorithm. A VERY sensitive parameter. I get best success for ChIP size data (about 100,000 to 1,000,000 bps) with a step size of 0.05. For DNase footprinting, which usually has >5,000,000 bps, I find 0.02 works best. Default:0.05", type=float, default=0.05)    
     parser.add_argument("-maxsites", dest="maxsites", help="Maximum number of expected sites for the motif. If not specified, defaults to 5 times number of initial predicted sites.", type=int, default=0)
     parser.add_argument("-minsites", dest="minsites", help="Minimum number of expected sites for the motif. Default: 10", type=int, default=10)
     parser.add_argument("-t", "--tries", dest="tries", help="Number of tries for each motif discovered. The fudge factor is changed until the number of discovered sites is in the \"acceptable\" range", type=int, default=15)
@@ -714,6 +715,7 @@ def main():
     starttime = time.time()
     args = parser.parse_args()
     seed = args.seed
+    initialstep = args.initialstep
     minsites = args.minsites
     maxsites = args.maxsites
     random.seed(seed)
@@ -765,7 +767,7 @@ def main():
     #print seqs
     negseqs = sequence.convert_ambigs(sequence.readFASTA(args.negfastafile, None, True))
     tries = args.tries
-    theta_motifs, theta_background_matrices, lambda_motifs, logevs, disc_pwms, disc_logevs, disc_nsites = extreme(seqs,negseqs,minsites,maxsites,pwm_guess,tries)
+    theta_motifs, theta_background_matrices, lambda_motifs, logevs, disc_pwms, disc_logevs, disc_nsites = extreme(seqs,negseqs,minsites,maxsites,pwm_guess,initialstep,tries)
     k = 1
     outputMEMEformat(disc_pwms, disc_logevs, disc_nsites, outpre)
     try:

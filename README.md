@@ -72,6 +72,7 @@ The following are arguments for EXTREME.py, the EXTREME algorithm:
 * `-t TRIES`. The number of different bias factors to try before giving up on the current seed.
 * `-s SEED`. Random seed for shuffling sequences and dataset positions.
 * `-p PSEUDOCOUNTS`. Uniform pseudo counts to add to initial PFM guess (default 0.0).
+* `-q INITALSTEP`.  The initial step size for the online EM algorithm. A VERY sensitive parameter. I get best success for ChIP size data (about 100,000 to 1,000,000 bps) with a step size of 0.05. For DNase footprinting, which usually has >5,000,000 bps, I find 0.02 works best (default 0.05).
 * `-minsites MINSITES`. Minimum number of sites the motif should have (default 10).
 * `-maxsites MAXSITES`. Minimum number of sites the motif should have. If not specified, it is set to five times the number of predicted motif sites based on the initial PFM guess
 * `-saveseqs SAVESEQS`. A switch. If used, the positive and negative sequence set will be saved to Positive_seq.fa and Negative_seq.fa, respectively, with instances of the discovered motif replaced with capital Ns.
@@ -94,7 +95,7 @@ $ python ../src/EXTREME.py GM12878_NRSF_ChIP.fasta GM12878_NRSF_ChIP_shuffled.fa
 
 EXTREME.py uses PFM seeds from GM12878_NRSF_ChIP.wm to initialize the online EM algorithm. The last argument tells EXTREME which of these seeds to use. GM12878_NRSF_ChIP.wm should have 23 PFM seeds, so the last argument can be any value between 1 and 23 in this case. 
 
-We have also included an ENCODE K562 DNase-Seq dataset. Try running EXTREME on your own with this dataset. In our publication, we used the parameters l=4, ming=0, maxg=10, minsites=10, zthresh=5 for the word search portion of the seeding. You can try experimenting with other sets of parameters too.
+We have also included an ENCODE K562 DNase-Seq dataset. Try running EXTREME on your own with this dataset. In our publication, we used the parameters l=4, ming=0, maxg=10, minsites=10, zthresh=5 for the word search portion of the seeding. We also used an initial step size of q=0.02. You can imagine the initial step size as a sort of "shaking" parameter. A larger initial step corresponds to a more vigorous shaking, while a smaller value corresponds to a more gentle shaking. You can try experimenting with other sets of parameters too. Please keep me updated on what you find.
 
 Output files
 ------------
