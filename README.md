@@ -76,6 +76,7 @@ The following are arguments for EXTREME.py, the EXTREME algorithm:
 * `-minsites MINSITES`. Minimum number of sites the motif should have (default 10).
 * `-maxsites MAXSITES`. Minimum number of sites the motif should have. If not specified, it is set to five times the number of predicted motif sites based on the initial PFM guess
 * `-saveseqs SAVESEQS`. A switch. If used, the positive and negative sequence set will be saved to Positive_seq.fa and Negative_seq.fa, respectively, with instances of the discovered motif replaced with capital Ns.
+* `-b BACKGROUND`. A switch. If used, the minimal MEME output will use the background frequencies from the learning, instead of the default uniform frequencies.
 
 Running EXTREME
 ---------------

@@ -449,7 +449,8 @@ def extreme(Y,neg_seqs,minsites,maxsites,pwm_guess,initialstep=0.05,tries=15,rev
     pos_nsites, neg_nsites = erase_motif(best_theta_motif, best_theta_background_matrix, best_lambda_motif, pos_seqs, neg_seqs)
     discovered_nonoverlapsites.append(pos_nsites)
     return all_theta_motifs, all_theta_background_matrices, all_lambda_motifs, all_logevs, \
-        discovered_theta_motifs, discovered_logevs, discovered_nonoverlapsites
+        discovered_theta_motifs, discovered_theta_background_matrices,discovered_logevs, \
+        discovered_nonoverlapsites
 
 
 """
@@ -668,14 +669,18 @@ disc_logevs - list of the log E-valus of the discovered motifs
 disc_nsites - list of motif sites
 outpre - the prefix of the output files
 """
-def outputMEMEformat(disc_pwms, disc_logevs, disc_nsites, outpre):
+def outputMEMEformat(disc_pwms, disc_bkg, disc_logevs, disc_nsites, outpre, use_bkg=False):
     _pv_format = "%3.1fe%+04.0f"
     f = open(outpre+"MEMEoutput.meme","w")
     f.write("MEME version 4.9.0\n\n")
     f.write("ALPHABET= ACGT\n\n")
     f.write("strands: + -\n\n")
     f.write("Background letter frequencies (from uniform background):\n")
-    f.write("A 0.25000 C 0.25000 G 0.25000 T 0.25000\n\n")
+    if use_bkg:
+        bkg_freq_str = "A %5.5f C %5.5f G %5.5f T %5.5f\n\n" % tuple(disc_bkg[0][0])
+    else:
+        bkg_freq_str = "A 0.25000 C 0.25000 G 0.25000 T 0.25000\n\n"
+    f.write(bkg_freq_str)
     n = 1
     for pwm, logev, nsites in zip(disc_pwms, disc_logevs, disc_nsites):
         g_string = sprint_logx(logev, 1, _pv_format)
@@ -709,6 +714,7 @@ def main():
     parser.add_argument("-t", "--tries", dest="tries", help="Number of tries for each motif discovered. The fudge factor is changed until the number of discovered sites is in the \"acceptable\" range", type=int, default=15)
     parser.add_argument("-s", "--seed", dest="seed", help="Random seed", type=int, default=1)
     parser.add_argument("-saveseqs", "--saveseqs", dest="saveseqs", help="If specified, save sequences to current directory", action='store_true')
+    parser.add_argument("-b", "--background", dest="background", help="If specified, the minimal MEME output will use the calculated background probabilities instead of uniform probabilities.", action='store_true')
     import time
     print "Started at:"
     print time.ctime()
@@ -767,9 +773,9 @@ def main():
     #print seqs
     negseqs = sequence.convert_ambigs(sequence.readFASTA(args.negfastafile, None, True))
     tries = args.tries
-    theta_motifs, theta_background_matrices, lambda_motifs, logevs, disc_pwms, disc_logevs, disc_nsites = extreme(seqs,negseqs,minsites,maxsites,pwm_guess,initialstep,tries)
+    theta_motifs, theta_background_matrices, lambda_motifs, logevs, disc_pwms, disc_bkg, disc_logevs, disc_nsites = extreme(seqs,negseqs,minsites,maxsites,pwm_guess,initialstep,tries)
     k = 1
-    outputMEMEformat(disc_pwms, disc_logevs, disc_nsites, outpre)
+    outputMEMEformat(disc_pwms, disc_bkg, disc_logevs, disc_nsites, outpre, args.background)
     try:
         from weblogolib import LogoData, LogoOptions, LogoFormat, png_formatter, eps_formatter, unambiguous_dna_alphabet
         for theta_motif, theta_background_matrix, lambda_motif, logev in zip(theta_motifs, theta_background_matrices, lambda_motifs, logevs):
