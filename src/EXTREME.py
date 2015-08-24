@@ -436,6 +436,7 @@ def extreme(Y,neg_seqs,minsites,maxsites,pwm_guess,initialstep=0.05,tries=15,rev
     #if no valid motif found, then exit
     if len(logevs) == 0:
         print 'No motif found, so do nothing...'
+        sys.exit()
     best_index = argmin(logevs)
     best_theta_motif = theta_motifs[best_index]
     best_theta_background_matrix = theta_background_matrices[best_index]
