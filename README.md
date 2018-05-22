@@ -1,7 +1,7 @@
 README for EXTREME 2.0
 ========================
 
-NOTE: As of 2018, this repository is deprecated. Unless you have specific reason to use EXTREME, I suggest to use [YAMDA](https://github.com/daquang/YAMDA),
+NOTE: As of 2018, this repository is deprecated. Unless you have specific reason to use EXTREME, I suggest to use [YAMDA](https://github.com/daquang/YAMDA).
 
 EXTREME is an efficient motif discovery algorithm. It applies the online EM algorithm to discover motifs. It uses the same
 model as MEME, representing sequence binding preference as position frequency matricies (PFMs). EXTREME is written in Python,
